@@ -36,8 +36,7 @@ public class ArxivAuthorNames
 		d("A R Prasanna");
 		d("Tellez"); 
 	}
-	
-	
+		
 	public static void d(String author)
 	{
 		System.out.println(author + " => " + getFirstInitialAndFamilyName(author));

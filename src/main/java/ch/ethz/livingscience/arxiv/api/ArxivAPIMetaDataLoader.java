@@ -27,7 +27,8 @@ import utils.text.XmlUtil;
  */
 public class ArxivAPIMetaDataLoader 
 {
-	public static final File arxivMetaDir = new File("/Users/cschulz/Documents/data/arxiv/xml201309_meta"); ///media/usb300/livingscience_data/arxiv/meta20110730");
+	//MANUAL: path to arxiv folder
+	public static final File arxivMetaDir = new File("D:/LivingScience/Data/arxiv/xml201309_meta"); ///media/usb300/livingscience_data/arxiv/meta20110730");
 	
 	public static void main(String[] args) throws Exception
 	{
@@ -46,24 +47,27 @@ public class ArxivAPIMetaDataLoader
 		Calendar cal = Calendar.getInstance();
 		Date today = cal.getTime();
 		
-		loader.downloadViaAPI(getDate(1980, 0), getDate(1990, 0));
-		// yearly
-		for (int i=1990; i<1993; i++)
-		{
-			loader.downloadViaAPI(getDate(i, 0), getDate(i+1, 0));
-		}
-		
-		// monthly
-		for (int y=1993; y<1999; y++)
-		{
-			for (int m=0; m<12; m++)
-			{
-				loader.downloadViaAPI(getDate(y, m), getDate(y, m+1));
-			}
-		}
+//		loader.downloadViaAPI(getDate(1980, 0), getDate(1990, 0));
+//		// yearly
+//		for (int i=1990; i<1993; i++)
+//		{
+//			loader.downloadViaAPI(getDate(i, 0), getDate(i+1, 0));
+//		}
+//		
+//		// monthly
+//		for (int y=1993; y<1999; y++)
+//		{
+//			for (int m=0; m<12; m++)
+//			{
+//				loader.downloadViaAPI(getDate(y, m), getDate(y, m+1));
+//			}
+//		}
 		
 		// daily
-		cal.set(1999, 0, 1, 0, 0, 0);
+		//cal.set(1999, 0, 1, 0, 0, 0);
+		
+		//MANUAL: set download date
+		cal.set(2013, 0, 1, 0, 0, 0);
 		
 		while (cal.getTime().before(today))
 		{

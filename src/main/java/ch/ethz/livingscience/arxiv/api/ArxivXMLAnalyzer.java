@@ -59,9 +59,10 @@ public class ArxivXMLAnalyzer
 	
 	public static void main(String[] args) throws Exception
 	{
+		//MANUAL: directory
 		new ArxivXMLAnalyzer().execAll(
-				new File("/Users/cschulz/Documents/data/arxiv/xml201309_meta/"),
-				new File("/Users/cschulz/Documents/data/arxiv/"));
+				new File("D:/LivingScience/Data/arxiv/xml201309_meta"),
+				new File("D:/LivingScience/Data/arxiv"));
 	}
 	
 	
@@ -133,13 +134,13 @@ public class ArxivXMLAnalyzer
 		
 //		tags.debugSorted();
 		
-		affiliations_zurich.debugSorted();
-		System.out.println(affiliations_zurich.totalCount() + " affiliations. " + affiliations_zurich.counts.size() + " unique affiliations.");
+//		affiliations_zurich.debugSorted();
+//		System.out.println(affiliations_zurich.totalCount() + " affiliations. " + affiliations_zurich.counts.size() + " unique affiliations.");
 	}
 	
 	Set<String> ids = new HashSet<>();
 	CountableSet<String> tags = new CountableSet<>();
-	CountableSet<String> affiliations_zurich = new CountableSet<>();
+//	CountableSet<String> affiliations_zurich = new CountableSet<>();
 //	IntHistogram versions = new IntHistogram(100);
 	
 	SimpleDateFormat arxivDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); // 1996-09-20T11:09:26Z
@@ -198,11 +199,11 @@ public class ArxivXMLAnalyzer
 			case "author":
 				Elements authorChilds = child.getChildElements();
 				pub.authors.add(authorChilds.get(0).getValue().replaceAll(";", ",").replaceAll("\n", ""));
-				if (authorChilds.size() > 1)
-				{
-					String affiliation = authorChilds.get(1).getValue().replaceAll(";", ",").replaceAll("\n", " ").replace("  ", " ").trim().toLowerCase();
-					if (affiliation.contains("zurich")) affiliations_zurich.add(affiliation);
-				}
+//				if (authorChilds.size() > 1)
+//				{
+//					String affiliation = authorChilds.get(1).getValue().replaceAll(";", ",").replaceAll("\n", " ").replace("  ", " ").trim().toLowerCase();
+//					if (affiliation.contains("zurich")) affiliations_zurich.add(affiliation);
+//				}
 			break;
 			}
 		}

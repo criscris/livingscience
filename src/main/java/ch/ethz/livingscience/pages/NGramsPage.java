@@ -53,7 +53,7 @@ public class NGramsPage extends ProfilePubListPage
 	NGramStore2_inMemory ngramsStore;
 	
 	float[] years;
-	int noOfYears = 12;
+	int noOfYears = 15;
 
 	public NGramsPage(Document doc, ProfilesDB db, String profileID, NGramStore2_inMemory ngramsStore) throws IOException
 	{
@@ -65,7 +65,7 @@ public class NGramsPage extends ProfilePubListPage
 	}
 	
 
-	static final Range yearsRange = new Range(2000, 2013);
+	static final Range yearsRange = new Range(2000, 2014);
 	
 	public void exec() throws IOException
 	{
@@ -205,8 +205,8 @@ public class NGramsPage extends ProfilePubListPage
 		
 		
 		PlotCanvasSVG.createOuterBorderRect = false;
-		PlotCanvasSVG canvas = new PlotCanvasSVG(800, 450,
-				new Axis("Year", yearsRange, yearsRange.generateTicks(14)), 
+		PlotCanvasSVG canvas = new PlotCanvasSVG(860, 450,
+				new Axis("Year", yearsRange, yearsRange.generateTicks(15)), 
 				yAxis, 300);
 		PlotCanvasSVG.createOuterBorderRect = true;
 		

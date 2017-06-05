@@ -7,14 +7,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.bson.types.ObjectId;
+
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
 import ch.ethz.livingscience.arxiv.ArxivCitation;
 import ch.ethz.livingscience.arxiv.api.ArxivXMLAnalyzer;
 import ch.ethz.livingscience.data.Profile;
 import ch.ethz.livingscience.data.ProfilesDB;
 import ch.ethz.livingscience.data.Publication;
-import ch.ethz.livingscience.data.affiliation.Institution;
 import ch.ethz.livingscience.data.affiliation.UniList;
 import utils.text.CountableSet;
 import utils.text.LineListener;
@@ -29,95 +33,41 @@ public class ProfilesDBCreator implements LineListener
 	}
 	
 	ProfilesDB db;
-	Map<String, List<String>> arxivIDtoEmailDomains;
 	UniList uniList;
 	
 	Map<String, List<Profile>> arxivIDtoProfile = new HashMap<>();
+	Map<String, String> nameToID;
 	List<Profile> profiles = new ArrayList<>();
 	
 	public ProfilesDBCreator() throws Exception
 	{
 		db = new ProfilesDB(27013);
-		arxivIDtoEmailDomains = createArxivIDtoEmailDomains();
+		nameToID = createNameToID();
 		uniList = new UniList();
-		
-		for (String line : TextFileUtil.loadList(new File("/Users/cschulz/Documents/data/arxiv/disambiguation/out/clusters.txt")))
-		{
-			List<String> parts = TextFileUtil.split(line, ";");
-			
-			Profile p = new Profile();
-			p.name = parts.get(0);
-			
-			int i1 = p.name.indexOf(", ");
-			p.name = p.name.substring(p.name.length() - 1) + " " + p.name.substring(0, i1);
-			
-			p.pubIDs = new ArrayList<>();
-			profiles.add(p);
-			
-			for (int i=1; i<parts.size(); i++)
-			{
-				String arxivID = parts.get(i);
-				
-				List<Profile> profiles = arxivIDtoProfile.get(arxivID);
-				if (profiles == null)
-				{
-					profiles = new ArrayList<>();
-					arxivIDtoProfile.put(arxivID, profiles);
-				}
-				profiles.add(p);
-			}
-		}
-		System.out.println(arxivIDtoProfile.size() + " pub are associated to a profile.");
 	}
 	
-	static final String[] emailDomainFilters = new String[] { "gmail", "googlemail", "outlook", "hotmail", "yahoo" };
-	static Map<String, List<String>> createArxivIDtoEmailDomains() throws Exception
+	//map with existing authors
+	Map<String, String> createNameToID() throws Exception
 	{
-		Map<String, List<String>> arxivIDtoEmailDomains = new HashMap<>();
-		
-		for (String line : TextFileUtil.loadList(new File("/Users/cschulz/Documents/data/arxiv/arxivemails.txt")))
+		Map<String, String> nameToID = new HashMap<>();
+		DBCursor cursor = db.collProfilesAuto.find();
+		int count = 0;
+		while(cursor.hasNext()) 
 		{
-			List<String> parts = TextFileUtil.split(line, ";");
-			
-			String arxivID = parts.get(0);
-			
-			List<String> domains = new ArrayList<>();
-			for (int i=1; i<parts.size(); i++)
-			{
-				String email = parts.get(i);
-				int i1 = email.indexOf("@");
-				
-				String domain = email.substring(i1 + 1).toLowerCase();
-				
-				boolean use = true;
-				for (String filter : emailDomainFilters)
-				{
-					if (domain.contains(filter))
-					{
-						use = false;
-						break;
-					}
-				}
-				if (!use) continue;
-				
-				domains.add(domain);
-			}
-			
-			if (domains.size() > 0) arxivIDtoEmailDomains.put(arxivID, domains);
+			DBObject dbo = cursor.next();
+			count++;
+			nameToID.put(dbo.get("name").toString(), dbo.get("_id").toString());
 		}
-		
-		System.out.println(arxivIDtoEmailDomains.size() + " pubs with emails.");
-		return arxivIDtoEmailDomains;
+		return nameToID;
 	}
 	
 	public void exec() throws Exception
 	{
 		long time = System.currentTimeMillis();
-		TextFileUtil.loadList(new File("/Users/cschulz/Documents/data/arxiv/arxivmeta_summaries.txt"), this);
+		TextFileUtil.loadList(new File("D:/LivingScience/Data/arxiv/arxivmeta_summaries.txt"), this);
 		System.out.println("Pubs loaded in " + (System.currentTimeMillis() - time) + " ms.");
 		
 		// now, add all profiles
-		int debugAffiliationCount = 0;
 		for (int i=0; i<profiles.size(); i++)
 		{
 			Profile profile = profiles.get(i);
@@ -141,8 +91,6 @@ public class ProfilesDBCreator implements LineListener
 					useClustername = false;
 				}
 				
-				profile.affiliation = guessAffiliation(pubs);
-				if (profile.affiliation != null) debugAffiliationCount++;
 			}
 			
 			if (useClustername)
@@ -158,17 +106,16 @@ public class ProfilesDBCreator implements LineListener
 			
 			
 			BasicDBObject doc = new BasicDBObject("name", profile.name).append("pubs", profile.pubIDs);
-			if (profile.affiliation != null) doc.append("affiliation", profile.affiliation);
 			db.collProfilesAuto.insert(doc);
 			
 			if ((i+1) % 2000 == 0) System.out.println("profile" + (i+1));
 		}
 		
-		System.out.println(debugAffiliationCount + " of " + profiles.size() + " have an affiliation.");
 		System.out.println((System.currentTimeMillis() - time) + " ms.");
 	}
 	
 	int pubCount = 0;
+	int autCount = 0;
 	public void newLine(int index, String line) 
 	{
 		ArxivCitation citation = new ArxivCitation(line);
@@ -181,9 +128,6 @@ public class ProfilesDBCreator implements LineListener
 		if (citation.title != null && citation.title.length() > 0) doc.append("title", citation.title);
 		if (citation.year != 0) doc.append("year", citation.year);
 		if (citation.summary != null && citation.summary.length() > 0) doc.append("summary", citation.summary);
-		
-		List<String> affiliations = arxivIDtoEmailDomains.get(citation.arxivID);
-		if (affiliations != null && affiliations.size() > 0) doc.append("affiliations", affiliations);
 		
 		doc.append("url", url);
 		
@@ -202,8 +146,49 @@ public class ProfilesDBCreator implements LineListener
 			}
 		}
 		
+		//for each author check if already in db, if so add pub, if not add author to db
+		for(String author : citation.authors)
+		{
+			String authorID = nameToID.get(author);
+			//author is already in db, add publication
+			if (authorID != null)
+			{
+				DBObject currentAuthor = db.collProfilesAuto.findOne(new BasicDBObject("_id", new ObjectId(authorID)));
+				List<String> autPubs = getList(currentAuthor.get("pubs"));
+				autPubs.add(id);
+				currentAuthor.put("pubs", autPubs);
+				db.collProfilesAuto.update(new BasicDBObject("_id", new ObjectId(authorID)), currentAuthor);
+			}
+			//add author to database and hashmap
+			else
+			{
+				List<String> pubsID = new ArrayList<>();
+				pubsID.add(id);
+				BasicDBObject autDoc = new BasicDBObject("name", author).append("pubs", pubsID);
+			    db.collProfilesAuto.insert(autDoc);
+			    authorID = autDoc.get("_id").toString();
+			    nameToID.put(author, authorID);
+			    autCount++;
+			}
+		}
+		
 		pubCount++;
 		if (pubCount % 2000 == 0) System.out.println("pub" + pubCount);
+		if (autCount % 2000 == 0) System.out.println("new authors: " + autCount);
+	}
+	
+	public static List<String> getList(Object result)
+	{
+		List<String> list = new ArrayList<>();
+		if (result == null) return list;
+		
+		BasicDBList e = (BasicDBList) result;
+		for (Object o : e)
+		{
+			list.add(o.toString());
+		}
+		
+		return list;
 	}
 	
 	static String guessFullName(String lastname, List<Publication> pubs)
@@ -230,31 +215,4 @@ public class ProfilesDBCreator implements LineListener
 		return entries.get(0).getKey();
 	}
 	
-	String guessAffiliation(List<Publication> pubs)
-	{
-		CountableSet<String> emailDomains = new CountableSet<>();
-		
-		for (Publication pub : pubs)
-		{
-			for (String affil : pub.affiliations)
-			{
-				emailDomains.add(affil);
-			}
-		}
-		
-		List<Entry<String, Integer>> entries = emailDomains.sortedEntriesDecending();
-		if (entries.size() == 0) return null;
-		
-		for (int i=0; i<Math.min(entries.size(), 3); i++)
-		{
-			String emailDomain = entries.get(0).getKey();
-			Institution inst = uniList.getInstitution(emailDomain);
-			if (inst != null)
-			{
-				return inst.name;
-			}
-		}
-		
-		return null;
-	}
 }
