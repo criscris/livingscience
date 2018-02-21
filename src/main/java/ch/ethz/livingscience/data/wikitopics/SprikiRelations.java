@@ -119,7 +119,7 @@ public class SprikiRelations
 					keyword.pcaIndex = -1;
 					keywords.put(wordgroup, keyword);
 				}
-				keyword.occurrences++;
+				keyword.occurrences++;				
 				pub.keywords.add(keyword);
 			}
 		}
@@ -166,9 +166,9 @@ public class SprikiRelations
 		}
 		
 		PCA pca = new PCA(A);
-		double[] pcFirst = new double[A.length];
+		double[] pcFirst = new double[A.length];		
 		pca.getPrincipalComponent(pcFirst, 0);
-		double[] pcSecond = new double[A.length];
+		double[] pcSecond = new double[A.length];		
 		pca.getPrincipalComponent(pcSecond, 1);
 		normalize(pcFirst, pcSecond);
 		
@@ -209,6 +209,6 @@ public class SprikiRelations
 		{
 			pca1[i] = (pca1[i] - minX) / rangeX;
 			pca2[i] = (pca2[i] - minY) / rangeY; // non-proportional scaling to X
-		}
-	}
+		}		
+}
 }

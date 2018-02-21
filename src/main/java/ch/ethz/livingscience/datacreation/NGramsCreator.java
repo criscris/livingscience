@@ -1,7 +1,9 @@
 package ch.ethz.livingscience.datacreation;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,20 +26,104 @@ import com.mongodb.DBObject;
 
 public class NGramsCreator 
 {
-	static File dir = new File("C:/Users/Public/Documents/Documents/LivingScience/data/arxivngrams");
+	static File dir = new File("data/arxivngrams/");
+	static int chunkSize = 10000;
 
 	public static void main(String[] args) throws Exception
-	{
-		//countNGrams();
-		//ngramToProfiles();
-		//createIndex();
+	{	
+		int port = new Integer(args[0]);
+		ProfilesDB db = new ProfilesDB(port);
+		
+		int numberPubs = (int) db.collPubs.count();
+		int iterations = (int) Math.ceil(numberPubs/chunkSize);
+		//to avoid memory issues, iterate through the publications in chunks of 
+		for(int i=0; i<iterations; i++)
+		{
+			countNGrams(db, i);
+			mergeFiles();
+		}
+		//the last ngrams_old file created will be the final. So rename it
+		new File(dir, "ngrams_old.txt").renameTo(new File(dir, "ngrams.txt"));
+		
+		ngramToProfiles(db);
+		createIndex();
 	}
 	
-	public static void countNGrams() throws Exception
+	public static void countNGrams(ProfilesDB db, int lowerBound) throws Exception
 	{
-//		Map<String, Integer> ngramCounts = new TreeMap<>();
+		Map<String, Integer> ngramCounts = new TreeMap<>();
+		NGrams ngrams = NGrams.getInstance();
+		
+		lowerBound = lowerBound*chunkSize;
+		int count = 0;
+		int upperBound = lowerBound + chunkSize;
+		DBCursor cursor = db.collPubs.find();
+		while(cursor.hasNext() && count<upperBound) 
+		{
+			DBObject dbo = cursor.next();
+			count++;
+			
+			//work around for the moment, just create a file with the 
+			//new ngrams to then merge them
+			if ( count > lowerBound)
+			{
+				Publication pub = db.toPub(dbo);
+				
+				for (String ngram: ngrams.getNGrams(pub.title, 1, 3))
+				{
+					if(ngramCounts.get(ngram) != null)
+					{
+						ngramCounts.put(ngram, ngramCounts.get(ngram) + 1);
+					}
+					else
+					{
+						ngramCounts.put(ngram, 1);
+					}
+				}
+				for (String ngram : ngrams.getNGrams(pub.summary, 1, 3))
+				{
+					if(ngramCounts.get(ngram) != null)
+					{
+						ngramCounts.put(ngram, ngramCounts.get(ngram) + 1);
+					}
+					else
+					{
+						ngramCounts.put(ngram, 1);
+					}
+				}
+			
+			}
+			
+		}
+	
+		int goodNgrams = 0;
+		int skippedBig = 0;
+		
+		System.out.println("writing...");
+		
+		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(dir, "ngrams_new.txt")));
+	
+		for (Entry<String, Integer> entries : ngramCounts.entrySet())
+		{
+			int c = entries.getValue();
+			if (c > 10000) 
+			{
+				skippedBig++;
+				continue;
+			}
+			if (c < 5)
+			{
+				continue;
+			}
+			goodNgrams++;
+			writer.write(entries.getKey() + "\n");
+		}
+		writer.close();
+		System.out.println(goodNgrams + " good n-grams. skippedBig=" + skippedBig);
+		
+//		CountableSet<String> ngramCounts = new CountableSet<>();
 //		NGrams ngrams = NGrams.getInstance();
-//		ProfilesDB db = new ProfilesDB(27013);
+//		ProfilesDB db = new ProfilesDB(29013);
 //		
 //		int count = 0;
 //		DBCursor cursor = db.collPubs.find();
@@ -47,41 +133,24 @@ public class NGramsCreator
 //			count++;
 //			
 //			Publication pub = db.toPub(dbo);
+//			
 //		
 //			for (String ngram: ngrams.getNGrams(pub.title, 1, 3))
 //			{
-//				if(ngramCounts.get(ngram) != null)
-//				{
-//					ngramCounts.put(ngram, ngramCounts.get(ngram) + 1);
-//				}
-//				else
-//				{
-//					ngramCounts.put(ngram, 1);
-//				}
+//				ngramCounts.add(ngram);
 //			}
 //			for (String ngram : ngrams.getNGrams(pub.summary, 1, 3))
 //			{
-//				if(ngramCounts.get(ngram) != null)
-//				{
-//					ngramCounts.put(ngram, ngramCounts.get(ngram) + 1);
-//				}
-//				else
-//				{
-//					ngramCounts.put(ngram, 1);
-//				}
+//				ngramCounts.add(ngram);
 //			}
 //			
-//			if (count % 20000 == 0) System.out.println(count + " ");
+//			if (count % 20000 == 0) System.out.println(count + " " + ngramCounts.counts.size());
 //		}
 //		
-//		int goodNgrams = 0;
+//		List<String> goodNgrams = new ArrayList<>();
+//		
 //		int skippedBig = 0;
-//		
-//		System.out.println("writing...");
-//		
-//		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(dir, "ngrams2.txt")));
-//	
-//		for (Entry<String, Integer> entries : ngramCounts.entrySet())
+//		for (Entry<String, Integer> entries : ngramCounts.counts.entrySet())
 //		{
 //			int c = entries.getValue();
 //			if (c > 10000) 
@@ -89,66 +158,18 @@ public class NGramsCreator
 //				skippedBig++;
 //				continue;
 //			}
-//			if (c < 5)
-//			{
-//				continue;
-//			}
-//			goodNgrams++;
-//			writer.write(entries.getKey() + "\n");
+//			if (c < 5) continue;
+//			goodNgrams.add(entries.getKey());
 //		}
-//		writer.close();
-//		System.out.println(goodNgrams + " good n-grams. skippedBig=" + skippedBig);
-		
-		CountableSet<String> ngramCounts = new CountableSet<>();
-		NGrams ngrams = NGrams.getInstance();
-		ProfilesDB db = new ProfilesDB(27013);
-		
-		int count = 0;
-		DBCursor cursor = db.collPubs.find();
-		while(cursor.hasNext()) 
-		{
-			DBObject dbo = cursor.next();
-			count++;
-			
-			Publication pub = db.toPub(dbo);
-			
-		
-			for (String ngram: ngrams.getNGrams(pub.title, 1, 3))
-			{
-				ngramCounts.add(ngram);
-			}
-			for (String ngram : ngrams.getNGrams(pub.summary, 1, 3))
-			{
-				ngramCounts.add(ngram);
-			}
-			
-			if (count % 20000 == 0) System.out.println(count + " " + ngramCounts.counts.size());
-		}
-		
-		List<String> goodNgrams = new ArrayList<>();
-		
-		int skippedBig = 0;
-		for (Entry<String, Integer> entries : ngramCounts.counts.entrySet())
-		{
-			int c = entries.getValue();
-			if (c > 10000) 
-			{
-				skippedBig++;
-				continue;
-			}
-			if (c < 5) continue;
-			goodNgrams.add(entries.getKey());
-		}
-		System.out.println(goodNgrams.size() + " good n-grams. skippedBig=" + skippedBig);
-		Collections.sort(goodNgrams);
-		System.out.println("sorted.");
-		TextFileUtil.writeList(goodNgrams, new File(dir, "ngrams.txt"));
+//		System.out.println(goodNgrams.size() + " good n-grams. skippedBig=" + skippedBig);
+//		Collections.sort(goodNgrams);
+//		System.out.println("sorted.");
+//		TextFileUtil.writeList(goodNgrams, new File(dir, "ngrams.txt"));
 
 	}
 	
-	public static void ngramToProfiles() throws Exception
+	public static void ngramToProfiles(ProfilesDB db) throws Exception
 	{
-		ProfilesDB db = new ProfilesDB(27013);
 		NGrams ngrams = NGrams.getInstance();
 		
 		Map<String, List<String>> ngramToProfiles = new HashMap<>();
@@ -228,5 +249,47 @@ public class NGramsCreator
 			}
 		}, new File(dir, "ngrams_profiles_index.txt"));
 		System.out.println("Index created in " + (System.currentTimeMillis() - time) + " ms.");
+	}
+	
+	public static void mergeFiles() throws Exception
+	{
+		Map<String, Integer> nGrams = new TreeMap<>();
+		//read first old file
+		System.out.println("reading old ngrams...");
+		BufferedReader reader = new BufferedReader(new FileReader(new File(dir, "ngrams_old.txt")));
+		String line = null;
+		int count = 0;
+		while ((line = reader.readLine()) != null)
+		{
+			count++;
+			nGrams.put(line, 1);
+			if (count % 50000 == 0) System.out.println(count);
+		}
+		reader.close();
+		System.out.println("reading new ngrams...");
+		count = 0;
+		//read the new file
+		BufferedReader reader2 = new BufferedReader(new FileReader(new File(dir, "ngrams_new.txt")));
+		while ((line = reader2.readLine()) != null)
+		{
+			count++;
+			//add if ngram is not in list
+			if(nGrams.get(line) == null)
+			{
+				nGrams.put(line, 1);
+			}			
+			if (count % 50000 == 0) System.out.println(count);
+		}
+		reader2.close();
+		
+		System.out.println("writing...");
+		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(dir, "ngrams_old.txt")));
+		
+		for (Entry<String, Integer> entries : nGrams.entrySet())
+		{
+			writer.write(entries.getKey() + "\n");
+		}
+		writer.close();
+		
 	}
 }

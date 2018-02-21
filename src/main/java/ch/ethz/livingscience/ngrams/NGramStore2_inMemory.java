@@ -15,9 +15,9 @@ public class NGramStore2_inMemory
 {
 	public static void writeShorter(String[] args) throws Exception
 	{
-		File dir = new File("/Users/cschulz/Documents/data/wos/ngrams/");
+		File dir = new File("C:/Users/user/Documents/Student_Assistant-Living_Sciences/data");
 		
-		final BufferedWriter writer = new BufferedWriter(new FileWriter(new File(dir, "from2000/ngramsYears_2000_2011.txt")));
+		final BufferedWriter writer = new BufferedWriter(new FileWriter(new File(dir, "/ngramsYears_2004_2017.txt")));
 		
 		class Counter
 		{
@@ -31,7 +31,7 @@ public class NGramStore2_inMemory
 			{
 				int i1 = line.indexOf(";");
 				String ngram = line.substring(0, i1);
-				int[] years = TextFileUtil.intArrayFromString(line.substring(i1 + 1), 100, 12, ";");
+				int[] years = TextFileUtil.intArrayFromString(line.substring(i1 + 1), 100, 13, ";");
 				
 				int countNonZeros = 0;
 				for (int i=0; i<years.length; i++) if (years[i] > 0) countNonZeros++;
@@ -69,8 +69,8 @@ public class NGramStore2_inMemory
 	public static void main(String[] args) throws Exception
 	{
 		NGramStore2_inMemory store = new NGramStore2_inMemory(
-				new File("/Users/cschulz/Documents/data/wos/ngrams/from2000/ngramsYears_2000_2011.txt"), 2000, 2011);	
-		
+				new File("C:/Users/user/Documents/Student_Assistant-Living_Sciences/data/ngramsYears_2004_2017.txt"), 2004, 2017);	
+	
 		System.out.println(Arrays.toString(store.getNormalizedYearCounts("financial crisis")));
 	}
 	
