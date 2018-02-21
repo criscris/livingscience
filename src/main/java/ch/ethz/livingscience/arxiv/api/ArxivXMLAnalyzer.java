@@ -61,8 +61,8 @@ public class ArxivXMLAnalyzer
 	{
 		//MANUAL: directory
 		new ArxivXMLAnalyzer().execAll(
-				new File("D:/LivingScience/Data/arxiv/xml201309_meta"),
-				new File("D:/LivingScience/Data/arxiv"));
+				new File("data/arxiv/xml_newmeta/"), 
+				new File("data/arxiv/"));
 	}
 	
 	

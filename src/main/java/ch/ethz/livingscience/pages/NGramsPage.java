@@ -53,7 +53,7 @@ public class NGramsPage extends ProfilePubListPage
 	NGramStore2_inMemory ngramsStore;
 	
 	float[] years;
-	int noOfYears = 15;
+	int noOfYears = 14;
 
 	public NGramsPage(Document doc, ProfilesDB db, String profileID, NGramStore2_inMemory ngramsStore) throws IOException
 	{
@@ -65,7 +65,7 @@ public class NGramsPage extends ProfilePubListPage
 	}
 	
 
-	static final Range yearsRange = new Range(2000, 2014);
+	static final Range yearsRange = new Range(2004, 2017);
 	
 	public void exec() throws IOException
 	{
@@ -205,8 +205,8 @@ public class NGramsPage extends ProfilePubListPage
 		
 		
 		PlotCanvasSVG.createOuterBorderRect = false;
-		PlotCanvasSVG canvas = new PlotCanvasSVG(860, 450,
-				new Axis("Year", yearsRange, yearsRange.generateTicks(15)), 
+		PlotCanvasSVG canvas = new PlotCanvasSVG(800, 450,
+				new Axis("Year", yearsRange, yearsRange.generateTicks(14)), 
 				yAxis, 300);
 		PlotCanvasSVG.createOuterBorderRect = true;
 		
@@ -282,10 +282,10 @@ class OfflineNGramsPlot
 {
 	public static void create(File outsvgFile, String... keywords) throws Exception 
 	{
-		File ngramsFile = new File("/Users/cschulz/Documents/data/wos/ngrams/from2000/ngramsYears_2000_2011.txt");
-		NGramStore2_inMemory ngramsStore = new NGramStore2_inMemory(ngramsFile, 2000, 2011);
+		File ngramsFile = new File("C:/Users/user/Documents/Student_Assistant-Living_Sciences/data/ngramsYears_2004_2017.txt");
+		NGramStore2_inMemory ngramsStore = new NGramStore2_inMemory(ngramsFile, 2004, 2017);
 		float[] allYears =  ngramsStore.getYears();
-		int noOfYears = 12;
+		int noOfYears = 14;
 		float[] years = Arrays.copyOfRange(allYears, allYears.length - noOfYears, allYears.length);
 		
 		List<NGramInfo> ngrams = new ArrayList<>();
