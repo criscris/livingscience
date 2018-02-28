@@ -31,18 +31,9 @@ import utils.text.XmlUtil;
 public class ArxivAPIMetaDataLoader
 {
   public static final File arxivMetaDir = new File("data/arxiv/xml_meta");
-  
-
-
-
   private File saveDir;
-  
 
-
-
-
-  public static void main(String[] args)
-    throws Exception
+  public static void main(String[] args) throws Exception
   {
     ArxivAPIMetaDataLoader loader = new ArxivAPIMetaDataLoader(arxivMetaDir);
     
@@ -73,12 +64,7 @@ public class ArxivAPIMetaDataLoader
     this.saveDir = saveDir;
   }
   
-
-
-
-
-  private static final DecimalFormat decimalFormat = new DecimalFormat("000000");
-  
+  private static final DecimalFormat decimalFormat = new DecimalFormat("000000");  
   private static final String urlStringBegin = "http://export.arxiv.org/api/query?search_query=cat:";
   private static final String urlStringMaxResults = "&max_results=";
   private static final String urlStringOffset = "&start=";
@@ -123,7 +109,6 @@ public class ArxivAPIMetaDataLoader
     cal.setTime(toExl);
     String toString = apiDateFormat.format(cal.getTime());
     
-
     URL url = new URL("http://export.arxiv.org/api/query?search_query=lastUpdatedDate:[" + fromString + "0000+TO+" + toString + "0000]&max_results=5000");
     System.out.println(noOfDownloads + " " + url);
     File file = new File(saveDir, fromString + "_" + toString + ".xml");
@@ -141,7 +126,6 @@ public class ArxivAPIMetaDataLoader
     tmpFile.delete();
   }
   
-
   private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
   
   public void download(Date from, Date to) throws Exception {

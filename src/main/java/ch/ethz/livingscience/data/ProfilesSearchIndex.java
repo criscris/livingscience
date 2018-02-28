@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -18,11 +20,13 @@ import utils.text.CountableSet;
 import utils.text.RandomAccessTextFile;
 import utils.text.TextFileUtil;
 
-public class ProfilesSearchIndex 
+public class ProfilesSearchIndex
 {
 	Map<String, List<String>> nameToProfileIDMap = new HashMap<>();
 	int noOfAutomaticProfiles = 0;
 	int noOfManualProfiles = 0;
+	HttpServletRequest req;
+	//String query = req.getParameter("q");
 	
 	RandomAccessTextFile ngramsSearchIndex;
 	
@@ -66,13 +70,19 @@ public class ProfilesSearchIndex
 		    	   db.labelIDtoInternalID.put(urlName, id);
 		    	   
 		    	   id = urlName;
-		    	   
-		    	   
-		    	   add(name, id);
+		    	   //add(name, id);
+		    	   /*
 		    	   String initialAndFamilyName = ArxivAuthorNames.getFirstInitialAndFamilyName(name);
 		    	   add(initialAndFamilyName, id);
+		    	   
 		    	   String familyName = ArxivAuthorNames.getFamilyName(name);
 		    	   add(familyName, id);
+		    	   
+		    	   String firstName = ArxivAuthorNames.getFirstName(name);
+		    	   add(firstName, id);
+		    	   */
+		    	   List<String> names = ArxivAuthorNames.getAllAssociatedNames(name);
+		    	   add(names, id);
 		    	   
 		    	   count++;
 		       }
@@ -89,17 +99,19 @@ public class ProfilesSearchIndex
 		return count;
 	}
 	
-	void add(String name, String profileID)
+	void add(List<String> names, String profileID)
 	{
-		if (name == null) return;
-		name = name.toLowerCase();
-		List<String> profileIDs = nameToProfileIDMap.get(name);
-		if (profileIDs == null)
-		{
-			profileIDs = new ArrayList<>();
-			nameToProfileIDMap.put(name,  profileIDs);
+		if (names == null) return;
+		for (String name : names){			
+			name = name.toLowerCase();
+			List<String> profileIDs = nameToProfileIDMap.get(name);
+			if (profileIDs == null)
+			{
+				profileIDs = new ArrayList<>();
+				nameToProfileIDMap.put(name,  profileIDs);			
+			}
+			profileIDs.add(profileID);
 		}
-		profileIDs.add(profileID);
 	}
 	
 	/**
@@ -116,8 +128,8 @@ public class ProfilesSearchIndex
 			Map<String, Float> scores = new HashMap<>();
 			for (String profileID : profileIDs)
 			{
-				scores.put(profileID, 0f);
-			}
+				scores.put(profileID, 0f);				
+			}			
 			return scores;
 		}
 		
