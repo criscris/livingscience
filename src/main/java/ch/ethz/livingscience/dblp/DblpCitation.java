@@ -26,6 +26,7 @@ public class DblpCitation
 	public String title;
 	public List<String> authors;
 	
+	public String url;
 	public String summary; // optional
 	
 	
@@ -40,10 +41,12 @@ public class DblpCitation
 		journal = "";
 		issue = "";
 		volume = "";
-		pages = "";
+		pages = "";  //format: "*-*", where * indicates a number
 		
 		title = "";
 		authors = new ArrayList<>();
+		
+		url = "";
 	}
 	
 	
