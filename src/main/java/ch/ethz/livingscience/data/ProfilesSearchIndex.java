@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,6 +25,7 @@ import utils.text.TextFileUtil;
 public class ProfilesSearchIndex
 {
 	Map<String, List<String>> nameToProfileIDMap = new HashMap<>();
+	List<String> profileNameList = new ArrayList<>();
 	int noOfAutomaticProfiles = 0;
 	int noOfManualProfiles = 0;
 	HttpServletRequest req;
@@ -82,7 +85,7 @@ public class ProfilesSearchIndex
 		    	   add(firstName, id);
 		    	   */
 		    	   List<String> names = ArxivAuthorNames.getAllAssociatedNames(name);
-		    	   add(names, id);
+		    	   add(names, id);		    	   
 		    	   
 		    	   count++;
 		       }
@@ -103,14 +106,15 @@ public class ProfilesSearchIndex
 	{
 		if (names == null) return;
 		for (String name : names){			
-			name = name.toLowerCase();
+			name = name.toLowerCase();			
 			List<String> profileIDs = nameToProfileIDMap.get(name);
 			if (profileIDs == null)
 			{
 				profileIDs = new ArrayList<>();
-				nameToProfileIDMap.put(name,  profileIDs);			
+				nameToProfileIDMap.put(name,  profileIDs);
+				profileNameList.add(name);
 			}
-			profileIDs.add(profileID);
+			profileIDs.add(profileID);			
 		}
 	}
 	
@@ -121,9 +125,33 @@ public class ProfilesSearchIndex
 	public Map<String, Float> queryForProfiles(String query)
 	{
 		String name = query.toLowerCase();
-		List<String> profileIDs = nameToProfileIDMap.get(name);
-		
-		if (profileIDs != null)
+		List<String> profileIDs = new ArrayList<>();
+		Map<Integer, String> nameToProfileDistanceMap = new HashMap<>();
+
+		for (String profile : profileNameList)
+		{
+			nameToProfileDistanceMap.put(ArxivAuthorNames.distance(profile, name), profile);
+//			if (ArxivAuthorNames.distance(profile, name) == 0)
+//			{
+//				profileIDs.addAll(nameToProfileIDMap.get(profile));
+//				//nameToProfileIDMap.get(profile);
+//				//break;
+//			}			
+		}
+//		if (profileIDs.isEmpty())
+//		{
+		for (Entry<Integer, String> entry : nameToProfileDistanceMap.entrySet()) 
+		{
+		    int key = entry.getKey();
+		    String value = entry.getValue();
+		    if (key < 3)
+		    {
+		    	profileIDs.addAll(nameToProfileIDMap.get(value));
+		    	//profileIDs = nameToProfileIDMap.get(value);				    	
+		    }
+		}
+
+		if (!profileIDs.isEmpty())
 		{
 			Map<String, Float> scores = new HashMap<>();
 			for (String profileID : profileIDs)

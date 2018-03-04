@@ -1,14 +1,7 @@
 package ch.ethz.livingscience.arxiv;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import utils.text.TextFileUtil;
 
@@ -161,16 +154,27 @@ public class ArxivAuthorNames
 		
 	}
 
-	// function to calculate Hamming distance (need to be experimented in near future)
-	public static int hammingDist(String query, String author)
+	// function to calculate Edit distance (Levenshtein distance) (need to be experimented in near future)
+	public static int distance(String s1, String s2)
 	{
-	    int i = 0, count = 0;
-	    while (i < query.length())
-	    {
-	        if (query.charAt(i) != author.charAt(i))
-	            count++;
-	        i++;
-	    }
-	    return count;
-	} 
+	     int edits[][]=new int[s1.length()+1][s2.length()+1];
+	     for(int i=0;i<=s1.length();i++)
+	         edits[i][0]=i;
+	     for(int j=1;j<=s2.length();j++)
+	         edits[0][j]=j;
+	     for(int i=1;i<=s1.length();i++){
+	         for(int j=1;j<=s2.length();j++){
+	             int u=(s1.charAt(i-1)==s2.charAt(j-1)?0:1);
+	             edits[i][j]=Math.min(
+	                             edits[i-1][j]+1,
+	                             Math.min(
+	                                edits[i][j-1]+1,
+	                                edits[i-1][j-1]+u
+	                             )
+	                         );
+	         }
+	     }
+	     return edits[s1.length()][s2.length()];
+	}
+	 
 }
