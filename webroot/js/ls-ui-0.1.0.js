@@ -396,7 +396,15 @@ function PubRenderer(pubMetaJSON, parentJQuery)
 	
 	$("#title_" + id)
 	.text(pubMetaJSON.title)
-	.attr("href", pubMetaJSON.url);
+	.attr("href", pubMetaJSON.url)
+	.click(function(event)
+	{
+		if($(this).attr('href') == '')
+		{
+			window.alert("DBLP does not provide a link.");
+			event.preventDefault();
+		}
+	});
 	
 	if (pubMetaJSON.summary)
 	{
@@ -1002,8 +1010,9 @@ function AffiliationMap_phase2()
 		{
 			var pubid = city.pubs[i];
 			var pub = data.publications[pubid];
+			
 			pubs += '<div><a href="' + pub.url + '" target="_blank" class="pubLink">' + pub.title + '</a></div>' +
-			'<div class="pubMeta">' + getMetaString(pub)  + '</div>';
+				'<div class="pubMeta">' + getMetaString(pub)  + '</div>';
 		}
 
 		var contentString = 
