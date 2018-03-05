@@ -124,7 +124,7 @@ public class ProfilesSearchIndex
 	 */
 	public Map<String, Float> queryForProfiles(String query)
 	{
-		String name = query.toLowerCase();
+		String name = query.toLowerCase().trim();
 		List<String> profileIDs = new ArrayList<>();
 		Map<Integer, String> nameToProfileDistanceMap = new HashMap<>();
 
@@ -140,11 +140,16 @@ public class ProfilesSearchIndex
 		}
 //		if (profileIDs.isEmpty())
 //		{
-		for (Entry<Integer, String> entry : nameToProfileDistanceMap.entrySet()) 
+		for (Entry<Integer, String> entry : nameToProfileDistanceMap.entrySet())		
 		{
 		    int key = entry.getKey();
 		    String value = entry.getValue();
-		    if (key < 3)
+		    if (key == 0)
+		    {
+		    	profileIDs.addAll(nameToProfileIDMap.get(value));
+		    	//profileIDs = nameToProfileIDMap.get(value);				    	
+		    }
+		    else if (key < 4 && key > 0 && profileIDs.isEmpty())
 		    {
 		    	profileIDs.addAll(nameToProfileIDMap.get(value));
 		    	//profileIDs = nameToProfileIDMap.get(value);				    	
