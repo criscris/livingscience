@@ -1,8 +1,11 @@
 package ch.ethz.livingscience.dblp;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -16,15 +19,16 @@ import ch.ethz.livingscience.data.ProfilesDB;
 import utils.text.TextFileUtil;
 
 public class DblpXMLAnalyzer {
+	static File dir = new File("data/dblp/sorted");
+	
 	public static void main(String[] args) throws Exception
 	{
-		//int port = new Integer(args[0]);
-		int port = 27013;
+		int port = new Integer(args[0]);
 		DblpXMLAnalyzer c = new DblpXMLAnalyzer(port);
 		c.execAll();
-//		c.test();
 	}
 	
+
 	
 	ProfilesDB db;
 	int existingAut, newAut;
@@ -38,38 +42,7 @@ public class DblpXMLAnalyzer {
 		existingPub = 0;
 		newPub = 0;
 	}
-	public void test() throws Exception
-	{
-		String tes = "__qName:author__qValue:Isra__qValue:ë__qValue:l-C__qValue:é__qValue:sar Lerman";
-		List<String> tagParts = TextFileUtil.split(tes, "__qValue:");
-		String autName = "";
-		for(int j=1; j<tagParts.size();j++) {
-			autName += tagParts.get(j);
-		}
-		System.out.println(autName);
-//		System.out.println("Number of publications before update: " + db.collPubs.count());
-//		System.out.println("Number of authors before update: " + db.collProfilesAuto.count());
-		
-//		DBObject currentAuthor = checkAuthor("Frank Manola");
-//		System.out.println(currentAuthor.get("pubs"));
-//		List<String> autPubs = getList(currentAuthor.get("pubs"));
-//		for(String pub:autPubs) {
-//			System.out.println(pub);
-//		}
-//		System.out.println(currentAuthor);
-//		DBCursor myDoc = db.collProfilesAuto.find().sort(new BasicDBObject("_id",-1)).limit(9);
-//		DBCursor myDoc1 = db.collPubs.find().sort(new BasicDBObject("_id",-1)).limit(12);
-//		for(int i=1;i<10;i++) {
-//		db.collProfilesAuto.remove(myDoc.next());
-//			//System.out.println(myDoc.next());
-//		}
-//		for(int i=1;i<13;i++) {
-//			db.collPubs.remove(myDoc1.next());
-//				//System.out.println(myDoc.next());
-//		}
-//		System.out.println("Number of publications before update: " + db.collPubs.count());
-//		System.out.println("Number of publications before update: " + db.collProfilesAuto.count());
-	}
+
 	public void execAll() throws Exception
 	{
 		try
@@ -77,26 +50,31 @@ public class DblpXMLAnalyzer {
 			System.out.println("Number of publications before update: " + db.collPubs.count());
 			System.out.println("Number of authors before update: " + db.collProfilesAuto.count());
 			
-		   	BufferedReader reader = new BufferedReader(new FileReader("C:/Users/almud/Documents/LivingScience/files/dblp/dump/sorted/test.txt"));
-		    String line = null;
-		    while ((line = reader.readLine()) != null)
-		    {
-		       	DblpCitation pub = newLine(line);
-		       	
-		       	if(pub != null) {
-		       	  //check if the publication is already in the database: needs improvement, now just checking the title as it is
-		       	  boolean isInDb = checkPub(pub.title);
-		       	  if(!isInDb) {
-		       		  newPub++;
-		       		  addPub(pub);
-		          }
-		       	  else {
-		       	      existingPub++;
-		       	  }
-		       	}
-		    }
-		    reader.close();
-		    
+			List<File> txtFiles = getFilesOfDir(dir, ".txt");
+			for(File fil:txtFiles)
+			{
+				System.out.println("Reading " + fil.getPath());
+				BufferedReader reader = new BufferedReader(new FileReader(fil.getPath()));
+			    String line = null;
+			    while ((line = reader.readLine()) != null)
+			    {
+			       	DblpCitation pub = newLine(line);
+			       	
+			       	if(pub != null) {
+			       	  //check if the publication is already in the database: needs improvement, now just checking the title as it is
+			       	  boolean isInDb = checkPub(pub.title);
+			       	  if(!isInDb) {
+			       		  newPub++;
+			       		  addPub(pub);
+			          }
+			       	  else {
+			       	      existingPub++;
+			       	  }
+			       	}
+			    }
+			    reader.close();
+			}
+		   	   
 		    System.out.println("existing authors: " + existingAut + "; new authors: " + newAut);
 			System.out.println("existing pubs: " + existingPub + "; new pubs: " + newPub);
 			
@@ -107,6 +85,22 @@ public class DblpXMLAnalyzer {
 		{
 		   	ex.printStackTrace();
 		}
+	}
+	
+	public static List<File> getFilesOfDir(File dir, final String ending)
+	{
+		File[] files_ = dir.listFiles(new FilenameFilter() 
+		{
+			public boolean accept(File dir, String name) 
+			{
+				return name.endsWith(ending);
+			}
+		});
+		List<File> files = new ArrayList<>();
+		for (File f : files_) files.add(f);
+		Collections.sort(files);
+		
+		return files;
 	}
 		
 	DblpCitation newLine(String line) throws Exception

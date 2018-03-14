@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import com.mongodb.Bytes;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
@@ -18,20 +19,24 @@ import ch.ethz.livingscience.ngrams.NGrams;
 public class NGramsYearsCreator2
 {
 
-  static File dir = new File("data/");
+//  static File dir = new File("data/");
+  static File dir = new File("C:/Users/almud/livingscience/data/");
   static int range = 13; //range of years for the NGrams
   int totalCount;
   Map<String, Integer> ngramToData;
 
   public static void main(String[] args) throws Exception
   {
-    int port = new Integer(args[0]);
-    ProfilesDB db = new ProfilesDB(port);
+//    int port = new Integer(args[0]);
+//    ProfilesDB db = new ProfilesDB(port);
+	  ProfilesDB db = new ProfilesDB(27013);
     
-    int year = new Integer(args[1]);
+//    int year = new Integer(args[1]);
+	  int year = 2018;
     
     NGramsYearsCreator2 c = new NGramsYearsCreator2();
-    for(int i=year - range; i<=year; i++)
+//    for(int i=year - range; i<=year; i++)
+    for(int i=2014; i<=year; i++)
     {
       System.out.println("creating file for year " + i + "...");
       c.countNGramsByYear(i, db);
@@ -48,7 +53,7 @@ public class NGramsYearsCreator2
   {
     NGrams ngrams = NGrams.getInstance();
     
-    DBCursor cursor = db.collPubs.find();
+    DBCursor cursor = db.collPubs.find().addOption(Bytes.QUERYOPTION_NOTIMEOUT);
     
     int count = 0;
     

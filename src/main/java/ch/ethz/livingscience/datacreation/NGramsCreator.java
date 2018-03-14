@@ -21,6 +21,8 @@ import utils.text.RandomAccessTextFile;
 import utils.text.RandomAccessTextFileLineListener;
 import utils.text.TextFileUtil;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.Bytes;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
@@ -46,6 +48,7 @@ public class NGramsCreator
 		new File(dir, "ngrams_old.txt").renameTo(new File(dir, "ngrams.txt"));
 		
 		ngramToProfiles(db);
+		
 		createIndex();
 	}
 	
@@ -65,7 +68,7 @@ public class NGramsCreator
 			
 			//work around for the moment, just create a file with the 
 			//new ngrams to then merge them
-			if ( count > lowerBound)
+			if ( count >= lowerBound)
 			{
 				Publication pub = db.toPub(dbo);
 				
@@ -168,8 +171,12 @@ public class NGramsCreator
 
 	}
 	
+//	public static void ngramToProfiles(ProfilesDB db, int lowerBound) throws Exception
 	public static void ngramToProfiles(ProfilesDB db) throws Exception
 	{
+//		lowerBound = lowerBound*chunkAut;
+//		int upperBound = lowerBound + chunkAut;
+		
 		NGrams ngrams = NGrams.getInstance();
 		
 		Map<String, List<String>> ngramToProfiles = new HashMap<>();
@@ -181,40 +188,82 @@ public class NGramsCreator
 		
 		int count = 0;
 		int countProfileEntries = 0;
-		DBCursor cursor = db.collProfilesAuto.find();
+		DBCursor cursor = db.collProfilesAuto.find().addOption(Bytes.QUERYOPTION_NOTIMEOUT);
 		System.out.println("parsing...");
-		while(cursor.hasNext()) 
+		
+//		while(cursor.hasNext() && count<upperBound) 
+		while(cursor.hasNext())
 		{
 			DBObject dbo = cursor.next();
 			count++;
 			
+//			if(count >= lowerBound) {
 			String profileID = dbo.get("_id").toString();
 			
+//			BasicDBObject searchObject = new BasicDBObject();
+//			searchObject.put("authors", dbo.get("name").toString());
+//			DBCursor resultSubset = db.collPubs.find(searchObject);
+			
 			for (String pubID : ProfilesDB.getList(dbo.get("pubs")))
+//			while(resultSubset.hasNext())
 			{
 				Publication pub = db.getPub(pubID);
+//				Publication pub = db.getPub(resultSubset.next().get("_id").toString());
 				
-				List<String> grams = ngrams.getNGrams(pub.title, 1, 3);
-				grams.addAll(ngrams.getNGrams(pub.summary, 1, 3));
-				
-				for (String ngram : grams)
+				if(pub != null)
 				{
-					List<String> profileIDs = ngramToProfiles.get(ngram);
-					if (profileIDs != null) 
-					{
+				  List<String> grams = ngrams.getNGrams(pub.title, 1, 3);
+				  grams.addAll(ngrams.getNGrams(pub.summary, 1, 3));
+				
+				  for (String ngram : grams)
+				  {
+				      List<String> profileIDs = ngramToProfiles.get(ngram);
+					  if (profileIDs != null) 
+					  {
 						profileIDs.add(profileID);
 						countProfileEntries++;
+					  }
+				  }
+				}
+				else
+				{
+					BasicDBObject searchObject = new BasicDBObject();
+					searchObject.put("authors", dbo.get("name").toString());
+					DBCursor resultSubset = db.collPubs.find(searchObject);
+					
+					while(resultSubset.hasNext())
+					{
+						pub = db.getPub(resultSubset.next().get("_id").toString());
+						
+						List<String> grams = ngrams.getNGrams(pub.title, 1, 3);
+						grams.addAll(ngrams.getNGrams(pub.summary, 1, 3));
+						
+						for (String ngram : grams)
+						{
+						    List<String> profileIDs = ngramToProfiles.get(ngram);
+						    if (profileIDs != null) 
+							{
+							  profileIDs.add(profileID);
+							  countProfileEntries++;
+							}
+						}
 					}
 				}
 			}
+//			}
 
 			if (count % 500 == 0) System.out.println(count + " " + countProfileEntries);
 		}
 		
 		System.out.println("writing...");
+//		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(dir, "ngrams_profiles_new.txt")));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(dir, "ngrams_profiles.txt")));
+		try {
+			System.out.println("words: " + words.size());
+			int wcount = 0;
 		for (String word : words)
 		{
+			wcount++;
 			List<String> profiles = ngramToProfiles.get(word);
 			if (profiles.size() == 0) continue;
 			
@@ -226,8 +275,15 @@ public class NGramsCreator
 			}
 			
 			writer.write("\n");
+			if (wcount % 10000 == 0) System.out.println("" + wcount);
 		}
 		writer.close();
+		}
+		catch (Exception ex)
+	       {
+	    	   ex.printStackTrace();
+	    	   writer.close();
+	       }
 	}
 	
 	public static void createIndex() throws Exception
@@ -284,6 +340,48 @@ public class NGramsCreator
 		
 		System.out.println("writing...");
 		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(dir, "ngrams_old.txt")));
+		
+		for (Entry<String, Integer> entries : nGrams.entrySet())
+		{
+			writer.write(entries.getKey() + "\n");
+		}
+		writer.close();
+		
+	}
+	
+	public static void mergeProfiles() throws Exception
+	{
+		Map<String, Integer> nGrams = new TreeMap<>();
+		//read first old file
+		System.out.println("reading old ngrams_profiles...");
+		BufferedReader reader = new BufferedReader(new FileReader(new File(dir, "ngrams_profiles_old.txt")));
+		String line = null;
+		int count = 0;
+		while ((line = reader.readLine()) != null)
+		{
+			count++;
+			nGrams.put(line, 1);
+			if (count % 50000 == 0) System.out.println(count);
+		}
+		reader.close();
+		System.out.println("reading new ngrams...");
+		count = 0;
+		//read the new file
+		BufferedReader reader2 = new BufferedReader(new FileReader(new File(dir, "ngrams_profiles_new.txt")));
+		while ((line = reader2.readLine()) != null)
+		{
+			count++;
+			//add if ngram is not in list
+			if(nGrams.get(line) == null)
+			{
+				nGrams.put(line, 1);
+			}			
+			if (count % 50000 == 0) System.out.println(count);
+		}
+		reader2.close();
+		
+		System.out.println("writing...");
+		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(dir, "ngrams_profiles_old.txt")));
 		
 		for (Entry<String, Integer> entries : nGrams.entrySet())
 		{

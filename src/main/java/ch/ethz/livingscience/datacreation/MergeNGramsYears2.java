@@ -12,7 +12,8 @@ import java.util.TreeMap;
 public class MergeNGramsYears2
 {
 
-  static File dir = new File("data/");
+//  static File dir = new File("data/");
+	static File dir = new File("C:/Users/almud/livingscience/data/");
   static int range = 13; //range of years for the NGrams
   Map<String, String> ngramToData;
   int[] totalCounts;
@@ -20,7 +21,8 @@ public class MergeNGramsYears2
 
   public static void main(String[] args) throws Exception
   {
-    toYear = new Integer(args[0]);
+//    toYear = new Integer(args[0]);
+	  toYear = 2018;
     fromYear = toYear - range;
     
     MergeNGramsYears2 c = new MergeNGramsYears2();

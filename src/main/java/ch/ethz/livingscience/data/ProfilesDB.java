@@ -57,20 +57,24 @@ public class ProfilesDB
 	public Publication toPub(DBObject result)
 	{
 		Publication pub = new Publication();
-		pub.authors = getList(result.get("authors"));
-		pub.journal = getStringOrNull(result.get("journal"));
-		pub.title = getStringOrNull(result.get("title"));
 		
-		String y = getStringOrNull(result.get("year"));
-		pub.year = y == null ? 0 : new Integer(y);
-		pub.summary = getStringOrNull(result.get("summary"));
-		pub.url = getStringOrNull(result.get("url"));
+		if (result != null)
+		{
+		  pub.authors = getList(result.get("authors"));
+		  pub.journal = getStringOrNull(result.get("journal"));
+		  pub.title = getStringOrNull(result.get("title"));
 		
-		pub.affiliations = getList(result.get("affiliations"));
+		  String y = getStringOrNull(result.get("year"));
+		  pub.year = y == null ? 0 : new Integer(y);
+		  pub.summary = getStringOrNull(result.get("summary"));
+		  pub.url = getStringOrNull(result.get("url"));
 		
-		result.put("id", result.get("_id").toString());
+		  pub.affiliations = getList(result.get("affiliations"));
+		
+		  result.put("id", result.get("_id").toString());
 
-		pub.json = result.toString();
+		  pub.json = result.toString();
+		}
 		
 		return pub;
 	}
