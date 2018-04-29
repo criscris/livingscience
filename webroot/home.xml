@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"></link>-->
+<title>Living Science</title>
+<style>
+	body,
+	html {
+	margin:0;
+	padding:0 0 16px 0;
+	color:rgb(64,64,64);
+	background-color:rgb(244,243,240);
+	font-family: arial,sans-serif;
+	font-size: 13px;
+	}
+
+	html {
+	overflow: -moz-scrollbars-vertical;
+	overflow-y: scroll;
+	}
+
+	table {
+	border: none;
+	}
+
+	textarea {
+	background-color:rgb(244,243,240);
+	}
+
+	a {
+	text-decoration: none;
+	color:rgb(244,243,240);
+	}
+	
+	.search-container {
+	  position:relative;
+      height: 23px;
+      width: 405px;
+      top: 100px;
+      left: 37%;
+    }
+    
+    .search-container form {
+      height: 23px;
+      width: 405px;
+    }
+    
+    .search-container input {
+      float: left;
+      width: 382px;
+      height:23px;
+      border: #fff;
+    }
+    
+    .search-container button {
+ 	  float: right;
+ 	  width:23px;
+ 	  height:23px;
+  	  background: #ddd;
+  	  font-size: 17px;
+  	  border: none;
+  	  cursor: pointer;
+  	  background : url(css/magnifying_glass.png);
+	}
+	
+	.logo-sbd {
+      position: absolute;
+      top: 0px;
+      right: 0px;
+      width: 110px;
+      height: 38px;
+    }
+    
+    .logo-ls {
+      position:relative;
+      top:100px;
+      left: 40%;
+      width: 308px;
+      height: 70px;
+    }
+    
+    .animation-container {
+      position:relative;
+      top: 120px;
+      left: 13%;
+      height: 500px;
+      width: 84%;
+    }
+    
+    .animation-header {
+      position:relative;
+      top: 120px;
+      left: 13%;
+      font-family: arial, sans serif;
+      font-style: italic;
+    }
+    
+    .contententry {
+      position:relative;
+      top: 120px;
+      left: 13%;
+      width: 84%;
+      font-family: arial, sans serif;
+      font-size: 18px;
+    }
+</style>
+<script type="application/javascript" src="/js/jquery-2.0.3.js">
+	<!-- _ -->
+</script>
+<script type="application/javascript" src="/js/json2.js">
+	<!-- _ -->
+</script>
+<script type="application/javascript" src="/js/jsonlint.js">
+	<!-- _ -->
+</script>
+<script type="application/javascript" src="http://d3js.org/d3.v2.js?2.9.1">
+	<!-- _ -->
+</script>
+<script type="application/javascript" src="/js/ls-ui-0.1.0.js">
+	<!-- _ -->
+</script>
+<script id="parsingDocumentData">
+	<!-- _ -->
+</script>
+</head>
+<body> 
+  <img src="css/logo-SoBigData.png" class="logo-sbd"/>
+  <img src="css/logo-LivingScience.png" class="logo-ls"/>
+  <div class="search-container">
+    <form name="input" action="/#" method="get">
+      <input id="queryInput" onFocus="this.select()" placeholder="Search firstname lastname or keywords" autocomplete="off" type="text" name="q" value=""/>
+      <button type="submit"><!-- <i class="fa fa-search"></i>--></button>
+    </form>
+  </div>
+  <div class="contententry">
+  	<span class="welcomeBig">Living Science is an open and editable database for publication metadata, structured as author profiles and for all research fields.<br/></span>
+    <span>There are currently</span><span id="noOfProfilesInDatabase" class="welcomeBig"> 0 </span><span>author profiles.</span>
+  </div>
+  <div class="animation-header"><p style="font-family:arial, sans serif;font-style:italics">Helbing Dirk's Wikipedia Topics</p></div>
+  <div id="welanimation" class="animation-container"></div>
+  <div id="leftsidebar"></div>
+  <span id="content"></span>
+</body>
+</html>

@@ -118,9 +118,9 @@ public class TextFileUtil
 		return lines;
 	}
 	
-	public static Stream<List<String>> stream(InputStream is, String separator, boolean ignoreFirstLine) throws Exception
+	public static Stream<List<String>> stream(InputStream is, final String separator, boolean ignoreFirstLine) throws Exception
 	{
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 		if (ignoreFirstLine) reader.readLine();
 		
 		class LineIter implements Iterator<List<String>>

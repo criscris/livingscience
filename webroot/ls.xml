@@ -233,7 +233,7 @@
 </script>
 </head>
 <body> 
-<div style="background:rgb(162,161,160);width:100%;height:48px">
+<div id="TopMenu" style="background:rgb(162,161,160);width:100%;height:48px">
 	<div style="width:1000px;margin:0 auto">
 		<div style="float:left;width:188px;cursor:pointer;" id="mainLogo">
 			<svg width="188px" height="48px" viewBox="0 0 188 48" xmlns="http://www.w3.org/2000/svg">
@@ -255,7 +255,7 @@
 				</g>
 			</svg>
 		</div>
-		<div style="float:right;width:812px;padding:0;margin:0px">
+		<div id="searchBox" style="float:right;width:812px;padding:0;margin:0px">
 			<div style="float:left;margin-top:15px">
 				<form name="input" action="/#" method="get">
 					<input id="queryInput" onFocus="this.select()" placeholder="Search firstname lastname or keywords" autocomplete="off" style="margin-left:16px;background:rgb(162,161,160);padding-left:5px;padding-top:3px;border-style: solid;border-color: black;border-width: 1px;font-family: arial, sans serif;font-size:16px;color:rgb(244,243,240);width:400px" type="text" name="q" value=""/>
@@ -277,15 +277,26 @@
 			
 		</span>
 		<span id="welcomecontent" style="visibility:hidden">
+			<div id="mainSearchBox" style="float:right;width:812px;padding:0;margin:0px">
+				<div style="float:left;margin-top:15px">
+					<form name="input" action="/#" method="get">
+						<input id="queryInput" onFocus="this.select()" placeholder="Search firstname lastname or keywords" autocomplete="off" style="margin-left:16px;background:rgb(162,161,160);padding-left:5px;padding-top:3px;border-style: solid;border-color: black;border-width: 1px;font-family: arial, sans serif;font-size:16px;color:rgb(244,243,240);width:400px" type="text" name="q" value=""/>
+					</form>
+				</div>
+			</div>
 			<div class="contententry"><span class="welcomeBig">Living Science is an open and editable database for publication metadata, </span><br><!-- _ --></br><span class="welcomeBig">structured as author profiles and for all research fields.</span></div>
 			<div class="contententry" ><span>There are currently</span><span id="noOfProfilesInDatabase" class="welcomeBig"> 0 </span><span>author profiles.</span></div>
 			<!-- <div class="contententry" style="margin-top:24px">Watch the introduction video:</div> -->
 			<!-- <div class="contententry" id="introVideo">  </div>	-->
 			<div class="contententry" style="margin-top:50px"><img src="css/logo-SoBigData.png" width="250px"></img></div>
+		    <div id="welanimation" style="width:800px;height:100%;background-color:rgb(244,243,240);">
+		<!-- _ -->
+	</div>
 		</span>
 		</div>
 	</div>
 </div>
+
 <div id="fullscreen" style="visibility:hidden;position:absolute;left:0;top:48px;right:0;bottom:0;background-color:rgb(244,243,240);">
 <!-- _ -->
 </div>

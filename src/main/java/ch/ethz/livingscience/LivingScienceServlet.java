@@ -51,6 +51,7 @@ public class LivingScienceServlet extends HttpServlet
 	
 	File staticContentDir;
 	CachedFile responseTemplate;
+	CachedFile homeResTemp;
 	Map<String, CachedFile> cachedFiles = new HashMap<>();
 	
 	ProfilesDB db;
@@ -69,6 +70,7 @@ public class LivingScienceServlet extends HttpServlet
 		this.ngramsStore = ngramsStore;
 		
 		responseTemplate = new CachedFile(new File(staticContentDir, "ls.xml"));
+		homeResTemp = new CachedFile(new File(staticContentDir, "home.xml"));
 		
 		uniList = new UniList();
 		relations = new SprikiRelations(new File(staticContentDir, "data/wikiScienceTopics2012.txt"));
@@ -195,6 +197,7 @@ public class LivingScienceServlet extends HttpServlet
 		requestStart(req);
 		
 		Document doc = responseTemplate.getXMLCopy();
+		Document homeDoc = homeResTemp.getXMLCopy();
 
 		// request
 		String query = req.getParameter("q");
@@ -255,7 +258,7 @@ public class LivingScienceServlet extends HttpServlet
 		}
 		else
 		{
-			page = new WelcomePage(doc, searchIndex);
+			page = new WelcomePage(homeDoc, searchIndex, db, relations);
 		}
 		
 		if (page != null)

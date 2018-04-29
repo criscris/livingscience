@@ -8,6 +8,7 @@ $(document).ready(function()
 	new ExternalSearch();
 	new AffiliationMap();
 	new TopicGraph();
+	new WelcomeAnimation();
 });
 
 
@@ -129,6 +130,10 @@ function LivingScienceMenu()
 	this.menuEntriesList = new Array();
 	
 	var extMenu = typeof(data) != "undefined" ? true : false;
+	var isWel = typeof(welGraph) != "undefined" ? true : false;
+	if(isWel){
+		extMenu = false;
+	}
 	
 	var subMenuList = new Array();
 	subMenuList.push(new SubMenuEntry("New Profile", function() 
@@ -149,7 +154,8 @@ function LivingScienceMenu()
 		var g = new GenericDialog("Create List", $content.get(0), buttons);
 		g.$cancelButton.text("OK");
 	}));
-	this.menuEntriesList.push(new MenuEntry("Create", subMenuList, this));
+	//"Create" feature was never implemented
+	//this.menuEntriesList.push(new MenuEntry("Create", subMenuList, this));
 	
 	if (extMenu)
 	{
@@ -204,23 +210,23 @@ function LivingScienceMenu()
 		this.menuEntriesList.push(new MenuEntry("Export", subMenuList, this));
 	}
 	
-	subMenuList = new Array();
-	var signInLabel = "Sign In";
+//	subMenuList = new Array();
+//	var signInLabel = "Sign In";
 //	if (typeof(login) != "undefined")
 //	{
 //		signInLabel = login.email;
 //	}
-	var signInMenu = new MenuEntry("" + signInLabel, subMenuList, this);
-	this.menuEntriesList.push(signInMenu);
-	signInMenu.$menuDiv.click(function() 
-	{ 
-		var $content = $("<div><div>No registration possible at the moment.</div></div>");
-		
-		var buttons = [];
-		
-		var g = new GenericDialog("Sign In", $content.get(0), buttons);
-		g.$cancelButton.text("OK");
-	});
+//	var signInMenu = new MenuEntry("" + signInLabel, subMenuList, this);
+//	this.menuEntriesList.push(signInMenu);
+//	signInMenu.$menuDiv.click(function() 
+//	{ 
+//		var $content = $("<div><div>No registration possible at the moment.</div></div>");
+//		
+//		var buttons = [];
+//		
+//		var g = new GenericDialog("Sign In", $content.get(0), buttons);
+//		g.$cancelButton.text("OK");
+//	});
 }
 
 /**
@@ -1116,6 +1122,94 @@ function TopicGraph()
 
 	var node = svg.selectAll(".node")
 	.data(graphData.nodes)
+	.enter().append("g")
+	.attr("class", "node")
+	.attr("id", function(d) { return d.group == 1 ? d.name : ""; })
+	.on("click", onclicknode)
+	.call(force.drag);
+	
+	node
+	.append("circle")
+	.attr("r", function(d) { return d.group == 2 ? 8 : 5; })
+	.attr("class", function(d) { return d.group == 2 ? "pubcirclenode" : "wikicirclenode"; });
+	
+	node
+	.append("text")
+	.attr("x", 0)
+	.attr("dy", 15)
+	.attr("text-anchor", "middle")
+	.text(function(d) { return d.group == 1 ? d.name : ""; });
+
+	node.append("title")
+	.text(function(d) { return d.group == 2 ? d.name : ""; });
+
+	force.on("tick", function() {
+		link.attr("x1", function(d) { return d.source.x; })
+		.attr("y1", function(d) { return d.source.y; })
+		.attr("x2", function(d) { return d.target.x; })
+		.attr("y2", function(d) { return d.target.y; });
+
+//		node.attr("cx", function(d) { return d.x; })
+//		.attr("cy", function(d) { return d.y; });
+		
+		node
+		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+	});
+}
+
+/**
+ * ---------------
+ * Welcome Animation
+ * ---------------
+ */
+
+function WelcomeAnimation()
+{
+	var isWelAni = typeof(welGraph) != "undefined" ? true : false;
+	if (!isWelAni) return;
+	
+	var win = document.getElementById("welanimation");
+	win.style.visibility = "visible";
+	var width = $("#welanimation").width();
+	var height = $("#welanimation").height();
+
+	var force = d3.layout.force()
+	.charge(-120)
+	.linkDistance(60)
+	.size([width, height]);
+
+	var svg = d3.select(win).append("svg")
+	.attr("width", width)
+	.attr("height", height);
+
+	svg.append("defs").append("style")
+	.attr("type", "text/css")
+	.text(".node {  } " +
+			".pubcirclenode { stroke: rgb(96,96,96); stroke-width: 1.5px; fill:rgb(69,109,169); } " +
+			".wikicirclenode { stroke: rgb(96,96,96); stroke-width: 1.5px; cursor:pointer; pointer-events: all; fill:rgb(162,161,160); } " +
+			".wikicirclenode:hover { fill:rgb(69,109,169); } " +
+			".link { stroke-width:1; stroke: rgb(162,161,160); stroke-opacity: .8; } " +
+			"text { color:rgb(64,64,64); font-size:13px; font-family:arial,sans-serif; pointer-events: none; }");
+
+	function onclicknode() 
+	{
+		var id = d3.select(this).attr("id");
+		if (id.length > 0) window.open("http://en.wikipedia.org/wiki/" + id);
+	}
+	
+	force
+	.nodes(welGraph.nodes)
+	.links(welGraph.links)
+	.start();
+
+	var link = svg.selectAll(".link")
+	.data(welGraph.links)
+	.enter().append("line")
+	.attr("class", "link");
+//	.style("stroke-width", function(d) { return Math.sqrt(d.value); });
+
+	var node = svg.selectAll(".node")
+	.data(welGraph.nodes)
 	.enter().append("g")
 	.attr("class", "node")
 	.attr("id", function(d) { return d.group == 1 ? d.name : ""; })
