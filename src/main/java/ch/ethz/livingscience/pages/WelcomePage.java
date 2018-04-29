@@ -14,6 +14,10 @@ import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+
 import nu.xom.Document;
 import nu.xom.Element;
 import nu.xom.Nodes;
@@ -40,7 +44,13 @@ public class WelcomePage extends Page
 		super(doc);
 		this.db = db;
 		//Dirk Helbing's id
-		this.profileID = "526010a4da06d385f5a31569";
+		DBObject author = null;
+		BasicDBObject searchObject = new BasicDBObject();
+		searchObject.put("name", "Dirk Helbing");
+		BasicDBObject fieldObject = new BasicDBObject();
+		fieldObject.put("_id", 1);
+		DBCursor resultSubset = db.collProfilesAuto.find(searchObject, fieldObject);
+		this.profileID = resultSubset.next().get("_id").toString();
 		this.relations = relations;
 		this.searchIndex = searchIndex;
 	}
