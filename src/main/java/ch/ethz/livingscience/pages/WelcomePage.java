@@ -6,7 +6,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,7 +37,7 @@ import ch.ethz.livingscience.data.wikitopics.SprikiResults;
 public class WelcomePage extends Page
 {
 	ProfilesDB db;
-	String profileID;
+	Profile profile;
 	SprikiRelations relations;
 	ProfilesSearchIndex searchIndex;
 	
@@ -43,25 +45,44 @@ public class WelcomePage extends Page
 	{
 		super(doc);
 		this.db = db;
-		//Dirk Helbing's id
-		DBObject author = null;
-		BasicDBObject searchObject = new BasicDBObject();
-		searchObject.put("name", "Dirk Helbing");
-		BasicDBObject fieldObject = new BasicDBObject();
-		fieldObject.put("_id", 1);
-		DBCursor resultSubset = db.collProfilesAuto.find(searchObject, fieldObject);
-		this.profileID = resultSubset.next().get("_id").toString();
 		this.relations = relations;
 		this.searchIndex = searchIndex;
+		this.profile = findProfile("Dirk Helbing");
 	}
 
-	Profile profile;
 	List<Publication> pubs;
 	JSONObject json;
 	
+	Profile findProfile(String name) throws IOException{
+		//query for profiles
+		Map<String, Float> profileScores = searchIndex.queryForProfiles(name);
+
+		List<Profile> profiles = new ArrayList<>();
+		for (Entry<String, Float> entry : profileScores.entrySet())
+		{
+			Profile profile = db.getProfile(entry.getKey());
+			if (profile != null) 
+			{
+				profile.score = entry.getValue();
+				profiles.add(profile);
+			}
+		}
+		Collections.sort(profiles, new Comparator<Profile>() 
+		{
+			public int compare(Profile o1, Profile o2) 
+			{
+				if (o1.score == o2.score)
+				{
+					return o2.pubIDs.size() - o1.pubIDs.size();
+				}
+				return (int) ((o2.score - o1.score)*1000f);
+			}
+		});
+		
+		return profiles.get(0);
+	}
 	void loadPubs() throws IOException
 	{
-		profile = db.getProfile(profileID);
 		if (profile == null)
 		{
 			Element div = new Element("div", ns);
