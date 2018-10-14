@@ -32,6 +32,7 @@ import ch.ethz.livingscience.ngrams.NGramStore2_inMemory;
 import ch.ethz.livingscience.pages.AffiliationsPage;
 import ch.ethz.livingscience.pages.BibtexPage;
 import ch.ethz.livingscience.pages.ExternalSearchPage;
+import ch.ethz.livingscience.pages.GlobalTrendsPage;
 import ch.ethz.livingscience.pages.JsonPage;
 import ch.ethz.livingscience.pages.NGramsPage;
 import ch.ethz.livingscience.pages.ProfilePubListPage;
@@ -247,6 +248,10 @@ public class LivingScienceServlet extends HttpServlet
 			case "bib": 
 				page = new BibtexPage(db, rs.profileID);
 			break;
+			//new for global trends
+			case "global":
+				page = new GlobalTrendsPage(doc, db, rs.profileID, ngramsStore);
+			break;	
 			default: 
 				page = new ProfilePubListPage(doc, db, rs.profileID);
 			break;

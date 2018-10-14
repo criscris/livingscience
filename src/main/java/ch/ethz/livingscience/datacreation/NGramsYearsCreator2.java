@@ -1,5 +1,7 @@
 package ch.ethz.livingscience.datacreation;
 
+import static com.mongodb.client.model.Filters.*;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -53,7 +55,7 @@ public class NGramsYearsCreator2
   {
     NGrams ngrams = NGrams.getInstance();
     
-    DBCursor cursor = db.collPubs.find().addOption(Bytes.QUERYOPTION_NOTIMEOUT);
+    DBCursor cursor = db.collPubs.find(eq("year", year)).addOption(Bytes.QUERYOPTION_NOTIMEOUT);
     
     int count = 0;
     

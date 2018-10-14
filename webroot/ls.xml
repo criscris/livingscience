@@ -181,7 +181,8 @@
 	padding-top:22px;
 	padding-right:6px;
 	padding-left:6px;
-	background-color:rgb(96,96,96);
+	/* background-color:rgb(96,96,96);*/
+	background-color:rgb(98,122,80);
 	color:rgb(244,243,240);
 	float:left;
 	font-size:12px;
@@ -197,7 +198,8 @@
 	}
 	.menuListEntry {
 	height:24px;
-	background-color:rgb(162,161,160);
+	/* background-color:rgb(162,161,160); */
+	background-color:rgb(138,162,120);
 	color:rgb(244,243,240);
 	padding-top:8px;
 	padding-left:6px;
@@ -206,11 +208,23 @@
 	}
 
 	.menuListEntry:hover {
-	background-color:rgb(96,96,96);
+	/* background-color:rgb(96,96,96); */
+	background-color:rgb(98,122,80);
 	}
 
 	.welcomeBig {
 		font-size:16px;
+	}
+	
+	.searchBar-container button {
+ 	  float: right; 
+ 	  width:26px;
+ 	  height:26px;
+  	  background: #ddd;
+  	  font-size: 17px;
+  	  border: none;
+  	  cursor: pointer;
+  	  background : url(css/magnifying_glass.png);
 	}
 </style>
 <script type="application/javascript" src="/js/jquery-2.0.3.js">
@@ -233,12 +247,15 @@
 </script>
 </head>
 <body> 
-<div id="TopMenu" style="background:rgb(162,161,160);width:100%;height:48px">
+<!-- <div id="TopMenu" style="background:rgb(162,161,160);width:100%;height:48px"> -->
+<div id="TopMenu" style="background:rgb(171,206,146);width:100%;height:48px">
 	<div style="width:1000px;margin:0 auto">
 		<div style="float:left;width:188px;cursor:pointer;" id="mainLogo">
 			<svg width="188px" height="48px" viewBox="0 0 188 48" xmlns="http://www.w3.org/2000/svg">
-			    <rect x="0" y="0" width="188px" height="48px" style="fill:rgb(96,96,96); stroke:none"/>
-				<g transform="translate(0,-4)" style="fill:rgb(241,238,232)">
+			    <!-- <rect x="0" y="0" width="188px" height="48px" style="fill:rgb(96,96,96); stroke:none"/> -->
+			    <rect x="0" y="0" width="188px" height="48px" style="fill:rgb(255,255,255); stroke:none"/>
+				<!-- <g transform="translate(0,-4)" style="fill:rgb(241,238,232)"> -->
+				<g transform="translate(0,-4)" style="fill:rgb(114,140,95)">
 				    <path d="m 11.861855,41.6667 13.376,0 -0.126269,-3.8867 -8.937826,0 0.126269,-25.3905 -4.438174,0 0,29.2772" />
 				    <path d="m 27.807668,21.4467 0,20.22 3.93,0 0,-20.22 -3.93,0" />
 				    <path d="m 42.479074,41.6667 4.62,-20.22 -4.32,0 -1.38,8.64 c -0.36,2.28 -0.69,4.71 -0.96,7.11 l -0.06,0 c -0.27,-2.37 -0.69,-4.86 -1.05,-7.02 l -1.44,-8.73 -4.35,0 4.53,20.22 4.41,0" />
@@ -256,9 +273,11 @@
 			</svg>
 		</div>
 		<div id="searchBox" style="float:right;width:812px;padding:0;margin:0px">
-			<div style="float:left;margin-top:15px">
+			<div class="searchBar-container" style="float:left;margin-top:15px">
 				<form name="input" action="/#" method="get">
-					<input id="queryInput" onFocus="this.select()" placeholder="Search firstname lastname or keywords" autocomplete="off" style="margin-left:16px;background:rgb(162,161,160);padding-left:5px;padding-top:3px;border-style: solid;border-color: black;border-width: 1px;font-family: arial, sans serif;font-size:16px;color:rgb(244,243,240);width:400px" type="text" name="q" value=""/>
+					<!--  <input id="queryInput" onFocus="this.select()" placeholder="Search firstname lastname or keywords" autocomplete="off" style="margin-left:16px;background:rgb(162,161,160);padding-left:5px;padding-top:3px;border-style: solid;border-color: black;border-width: 1px;font-family: arial, sans serif;font-size:16px;color:rgb(244,243,240);width:400px" type="text" name="q" value=""/> -->
+					<input id="queryInput" onFocus="this.select()" placeholder="Search firstname lastname or keywords" autocomplete="off" style="margin-left:16px;background:rgb(255,255,255);padding-left:5px;padding-top:3px;border-style: solid;border-color: white;border-width: 1px;font-family: arial, sans serif;font-size:16px;color:rgb(183,185,181);width:400px" type="text" name="q" value=""/>
+				    <button type="submit"><!-- <i class="fa fa-search"></i>--></button>
 				</form>
 			</div>
 			<div style="float:right" id="lsMainMenu">

@@ -1,13 +1,17 @@
 package ch.ethz.livingscience.pages;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
 import nu.xom.Attribute;
 import nu.xom.Document;
@@ -26,7 +30,12 @@ import ch.ethz.livingscience.data.ProfilesDB;
 import ch.ethz.livingscience.data.Publication;
 import ch.ethz.livingscience.ngrams.NGramStore2_inMemory;
 import ch.ethz.livingscience.ngrams.NGrams;
-
+/*
+ * The "Fraction" represents (number of occurences of the ngram that year)/(total number of occurrences of that ngram).
+ * It uses the ngramYears text file to get the number of ocurrences. The reason the plot goes down is that the graph takes
+ * the minimum between a score or 1e-10f, so for years in which a term was still not popular the result goes down.
+ * The plot gets cut when the result of the log is -infinity (i.e. the fraction is too close to zero)
+ */
 public class NGramsPage extends ProfilePubListPage
 {
 	static RgbColor[] colors = new RgbColor[]
@@ -51,44 +60,118 @@ public class NGramsPage extends ProfilePubListPage
 	};
 	
 	NGramStore2_inMemory ngramsStore;
-	
 	float[] years;
-	int noOfYears = 14;
-
+	int noOfYears;
+	//number of keywords to plot for an author
+    static int noOfKeywords = 5;
 	public NGramsPage(Document doc, ProfilesDB db, String profileID, NGramStore2_inMemory ngramsStore) throws IOException
 	{
 		super(doc, db, profileID);
 		this.ngramsStore = ngramsStore;
-		
-		float[] allYears =  ngramsStore.getYears();
-		years = Arrays.copyOfRange(allYears, allYears.length - noOfYears, allYears.length);
+		this.noOfYears = ngramsStore.getNoOfYears();
+		this.years = ngramsStore.getYears();
+//		float[] allYears =  ngramsStore.getYears();
+//		years = Arrays.copyOfRange(allYears, allYears.length - noOfYears, allYears.length);
 	}
 	
 
-	static final Range yearsRange = new Range(2004, 2017);
+//	static final Range yearsRange = new Range(2005, 2018);
 	
 	public void exec() throws IOException
 	{
+		Set<String> shortnames = new HashSet<>();
+		DBCursor cursor2 = db.collAcm.find();
+		while(cursor2.hasNext()) {
+			DBObject dbo2 = cursor2.next();
+			String sname = dbo2.get("shortname").toString();
+			shortnames.add(sname);
+		}
 		loadPubs();
-		
+		int fromYear = (int)years[0];
+		int toYear = (int)years[years.length-1];
 		NGrams ngramsExtractor = NGrams.getInstance();
-		Set<String> ngramsSet = new HashSet<>();
+//		Set<String> ngramsSet = new HashSet<>();
+		//total pubs of an author per year
+		int[] noOfPubs = new int[noOfYears];
+//		for (Publication pub : pubs)
+//		{
+//			if (pub.title != null) ngramsSet.addAll(ngramsExtractor.getNGrams(pub.title, 2, 3));
+//			if (pub.summary != null) ngramsSet.addAll(ngramsExtractor.getNGrams(pub.summary, 2, 3));
+//		}
+		
+		/*
+		 * change plot to all per author. 2005 shoudlnt be manual. 14 should be years
+		 */
+		Map<String, int[]> ngramsPSet = new HashMap<>();
 		for (Publication pub : pubs)
 		{
-			if (pub.title != null) ngramsSet.addAll(ngramsExtractor.getNGrams(pub.title, 2, 3));
-			if (pub.summary != null) ngramsSet.addAll(ngramsExtractor.getNGrams(pub.summary, 2, 3));
+			if(pub.year>=fromYear & pub.year<=toYear) {
+			int index = pub.year - fromYear;
+		    noOfPubs[index]+=1;
+			List<String> pubNgrams = new ArrayList<>();
+//			if (pub.title != null) pubNgrams.addAll(ngramsExtractor.getNGrams(pub.title, 2, 3));
+			if (pub.title != null) pubNgrams.addAll(ngramsExtractor.getACMNGrams(pub.title, 2, 3, shortnames));
+//			if (pub.summary != null) pubNgrams.addAll(ngramsExtractor.getNGrams(pub.summary, 2, 3));
+			if (pub.summary != null) pubNgrams.addAll(ngramsExtractor.getACMNGrams(pub.summary, 2, 3, shortnames));
+			Set<String> hs = new HashSet<>();
+			hs.addAll(pubNgrams);
+			pubNgrams.clear();
+			pubNgrams.addAll(hs);
+			
+			for (String ngram: pubNgrams)
+			{	
+				int[] countsNGram = ngramsPSet.get(ngram);
+				
+				//check if ngram is already in list
+				if (ngramsPSet.get(ngram) != null)
+				{
+					//increase count for the nGram
+					countsNGram[index] +=1;
+					countsNGram[noOfYears] +=1;
+					ngramsPSet.put(ngram, countsNGram);
+				}
+				else
+				{
+					//add new entry
+					countsNGram = new int[noOfYears+1];
+					Arrays.fill(countsNGram, 0);
+					countsNGram[index] = 1;
+					countsNGram[noOfYears] = 1;
+					ngramsPSet.put(ngram, countsNGram);
+				}
+			}
+			}	
 		}
 		
-
+		/*
+		 * end
+		 */
 		List<NGramInfo> ngrams = new ArrayList<>();
-		for (String entry : ngramsSet)
+//		for (String entry : ngramsSet)
+//		{
+//			ngrams.add(new NGramInfo(entry));
+//		}
+		
+		for (String entry : ngramsPSet.keySet())
 		{
 			ngrams.add(new NGramInfo(entry));
 		}
 		
 		for (NGramInfo ni : ngrams)
 		{
-			float[] result = ngramsStore.getNormalizedYearCounts(ni.name);
+			//change fraction
+			//float[] result = ngramsStore.getNormalizedYearCounts(ni.name);
+			/*
+			 * 
+			 */
+			float[] result = new float[noOfYears];
+			for (int i=0; i<noOfYears; i++)
+			{
+				result[i] = noOfPubs[i] == 0 ? 0f : ((float) ngramsPSet.get(ni.name)[i] / noOfPubs[i]);
+			}
+			/*
+			 * 
+			 */
 			if (result != null)
 			{
 				ni.result = Arrays.copyOfRange(result, result.length - noOfYears, result.length);
@@ -104,23 +187,11 @@ public class NGramsPage extends ProfilePubListPage
 		Element heading = new Element("div", ns);
 		heading.addAttribute(new Attribute("class", "mainHeading"));
 		heading.appendChild("Keyword Trends for: " + profile.name);
-		content.appendChild(heading);
-		
-		
-		
+		content.appendChild(heading);	
 
-		
-//		float maxYGrid = Range.getSmallest1Digitbound(maxY, true);
-//		if (maxYGrid == 0f) maxYGrid = 1f;
-//		Axis yAxis = new Axis("Fraction of all publications", new Range(0, maxYGrid), new float[] {0, maxYGrid / 2f, maxYGrid}, new String[] {"0", "" + (maxYGrid / 2), "" + maxYGrid});
-//		
-		
-
-		int noOfPlots = 0;
 		try
 		{	
 			PlotCanvasSVG canvas = getSVGPlot(ngrams, years);
-			noOfPlots = canvas.noOfPlots();
 			Element svg = canvas.getSVG();
 			
 			svg.addAttribute(new Attribute("width", (int) (0.65f * canvas.getWidth()) + "px"));
@@ -144,13 +215,9 @@ public class NGramsPage extends ProfilePubListPage
 		
 		
 		Element p = new Element("p", ns);
-		p.appendChild(ngrams.size() + " keywords could be extracted from the publication list of " + profile.name + ". Displayed are the " + noOfPlots + " keywords that have the best upward trend during " + (int) years[0] + " and " + (int) years[years.length - 1] + "."
-				+ "The plot shows the fraction of all publications for a specific year that contains the keyword.");
+		p.appendChild(ngrams.size() + " keywords could be extracted from the publication list of " + profile.name + ". Displayed are the " + noOfKeywords + " keywords that have the best upward trend during " + (int) years[0] + " and " + (int) years[years.length - 1] + "."
+				+ "The plot shows the percentage of all publications of the author for a specific year that contain the keyword.");
 		stats.appendChild(p);
-		
-//		p = new Element("p", ns);
-//		stats.appendChild("Web of Science lists about 47 million publications. We extracted 6.934.872 (1,2,3)-grams from publication titles, ignoring common stop words at beginning and end of n-grams and not considering n-grams that occur less than 5 times.");
-//		stats.appendChild(p);
 	}
 	
 
@@ -163,22 +230,32 @@ public class NGramsPage extends ProfilePubListPage
 		int addedCount = 0;
 		int i = 0;
 		String ngramsAdded = "";
-		while (i < ngrams.size() && addedCount < 8)
+		while (i < ngrams.size() && addedCount < noOfKeywords)
 		{
 			NGramInfo ngram = ngrams.get(i);
+			System.out.println(ngram.name + " and score: " + ngram.score);
+			//get the log of the result array
+			float[] presult = ngram.result;
+//			for(int j=0;j<presult.length;j++)
+//			{
+//				presult[j] = (float) Math.log10(presult[j]);
+//			}
 			i++;
 			if (ngram.score == 0f) continue;
 			if (ngramsAdded.indexOf(ngram.name) != -1) continue; // is a subset of an existing ngram
 			
 			RgbColor color = addedCount < colors.length ? colors[addedCount] : new RgbColor((float) Math.random(), (float) Math.random(), (float) Math.random());
 			
-			Plot p = new Plot(years, ngram.result);
+			//Plot p = new Plot(years, ngram.result);
+			//Try plotting the logarithm instead
+			Plot p = new Plot(years, presult);
 			
 			PlotLineProps props = new PlotLineProps(color);
 			p.props = props;
 			plots.add(p);
 
-			p = new Plot(years, ngram.result);
+			//p = new Plot(years, ngram.result);
+			p = new Plot(years, presult);
 			PlotDotProps dprops = new PlotDotProps(color);
 			dprops.shape = shapes[addedCount % shapes.length];
 			p.props = dprops;
@@ -191,22 +268,22 @@ public class NGramsPage extends ProfilePubListPage
 			
 			maxY = Math.max(maxY, p.yRange.max);
 			minY = Math.min(minY, p.yRange.min);
-			
-			// prevent 0 values which leads to missing line plots (screen coords in infinity)
-			for (int j=0; j<ngram.result.length; j++) ngram.result[j] = Math.max(1e-10f, ngram.result[j]);
 		}
 		
-		int min = -1;
+		int min = 0;
 		for (; min>=-6; min--) if (Math.pow(10, min) < minY) break;
 		
-		int max = -7;
+		int max = 1;
 		for (; max<=-1; max++) if (Math.pow(10, max) > maxY) break;
-		Axis yAxis = new Axis("Fraction", 1, min, 1, max);
+		//Axis yAxis = new Axis("Fraction", 1, min, 1, max);
+		Range yrange = new Range(0,1);
+		Axis yAxis = new Axis("Percentage", yrange,yrange.generateTicks(6));
 		
-		
+		Range yearsRange = new Range(years[0], years[years.length-1]);
+		//for helbing dirk min=-7,max=-1
 		PlotCanvasSVG.createOuterBorderRect = false;
 		PlotCanvasSVG canvas = new PlotCanvasSVG(800, 450,
-				new Axis("Year", yearsRange, yearsRange.generateTicks(14)), 
+				new Axis("Year", yearsRange, yearsRange.generateTicks(years.length)), 
 				yAxis, 300);
 		PlotCanvasSVG.createOuterBorderRect = true;
 		
@@ -214,22 +291,10 @@ public class NGramsPage extends ProfilePubListPage
 		{
 			canvas.draw(p);
 		}
-		
+
 		return canvas;
 	}
 	
-	public static void main(String[] args) throws Exception
-	{
-		File outDir = new File("/Users/cschulz/Documents/projects/2013_ia/researchplans/");
-		
-		OfflineNGramsPlot.create(new File(outDir, "websites.svg"), 
-				"facebook", "youtube", "wikipedia", "linkedin", "twitter", "ebay"
-				);
-		
-		OfflineNGramsPlot.create(new File(outDir, "keywords.svg"), 
-				"online communities", "online community", "social networks", "social network", "online social networks"
-				);
-	}
 }
 
 class NGramInfo implements Comparable<NGramInfo>
@@ -249,66 +314,40 @@ class NGramInfo implements Comparable<NGramInfo>
 	public void computeScore()
 	{
 		score = 0f;
-		if (result == null) return;
-
-		
-		float maxRise = 0f;
-		int last = result.length - dt;
-		for (int i=0; i<last; i++)
-		{
-			float begin = result[i];
-			float end = result[i+dt];
-			if (begin < minFraction || end < minFraction) continue;
-			
-			float rise = end / begin;
-			maxRise = Math.max(rise, maxRise);
-		}
-		score = maxRise;
-		
-//		// sum
-//		for (int i=0; i<result.length; i++)
+//		if (result == null) return;
+//
+//		
+//		float maxRise = 0f;
+//		int last = result.length - dt;
+//		for (int i=0; i<last; i++)
 //		{
-//			score += result[i];
+//			float begin = result[i];
+//			float end = result[i+dt];
+//			if (begin < minFraction || end < minFraction) continue;
+//			
+//			float rise = end / begin;
+//			maxRise = Math.max(rise, maxRise);
 //		}
+//		score = maxRise;
+		//total sum of the slopes, for now calculated as ((counts yeari+1)-(counts yeari))^3 to give more value
+		//to steep slopes and keep the sign (plain average would just be lastyear-firstyear)
+		double totalSum = 0;
+		for(int i=0;i<result.length-1;i++)
+		{
+			if(result[i]!=0) 
+			{
+				totalSum += 100*(result[i+1]-result[i])/result[i];
+			}
+			else if(result[i+1]!=0)
+			{
+				totalSum+=100;
+			}
+			score = (float) (totalSum/(result.length-1));
+		}
 	}
 
 	public int compareTo(NGramInfo o) 
 	{
 		return (int) ((o.score - score) * 1000000f);
-	}
-}
-
-class OfflineNGramsPlot
-{
-	public static void create(File outsvgFile, String... keywords) throws Exception 
-	{
-		File ngramsFile = new File("C:/Users/user/Documents/Student_Assistant-Living_Sciences/data/ngramsYears_2004_2017.txt");
-		NGramStore2_inMemory ngramsStore = new NGramStore2_inMemory(ngramsFile, 2004, 2017);
-		float[] allYears =  ngramsStore.getYears();
-		int noOfYears = 14;
-		float[] years = Arrays.copyOfRange(allYears, allYears.length - noOfYears, allYears.length);
-		
-		List<NGramInfo> ngrams = new ArrayList<>();
-		for (String entry : keywords)
-		{
-			ngrams.add(new NGramInfo(entry));
-		}
-		
-		for (NGramInfo ni : ngrams)
-		{
-			float[] result = ngramsStore.getNormalizedYearCounts(ni.name);
-			if (result != null)
-			{
-				ni.result = Arrays.copyOfRange(result, result.length - noOfYears, result.length);
-			}
-		}
-		for (NGramInfo ni : ngrams)
-		{
-			ni.score = 1f;
-		}
-		Collections.sort(ngrams);
-		
-		PlotCanvasSVG canvas = NGramsPage.getSVGPlot(ngrams, years);
-		canvas.save(outsvgFile);
 	}
 }

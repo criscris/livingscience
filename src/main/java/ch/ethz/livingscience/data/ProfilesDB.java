@@ -23,12 +23,14 @@ public class ProfilesDB
 	static final String profilesAutomaticCollection = "profilesauto";
 	static final String profilesManualCollection = "profilesmanual";
 	static final String listsCollection = "publists";
+	static final String acmCollection = "acmwords";
 
 	MongoClient mongo;
 	DB db;
 	
 	public DBCollection collPubs;
 	public DBCollection collProfilesAuto;
+	public DBCollection collAcm;
 	DBCollection collProfilesManual;
 	DBCollection collPubLists;
 	
@@ -41,6 +43,7 @@ public class ProfilesDB
 		collProfilesAuto = db.getCollection(profilesAutomaticCollection);
 		collProfilesManual = db.getCollection(profilesManualCollection);
 		collPubLists = db.getCollection(listsCollection);
+		collAcm = db.getCollection(acmCollection);
 		
 		System.out.println("Connected to mongo.");
 	}

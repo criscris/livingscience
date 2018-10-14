@@ -7,8 +7,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,13 +16,6 @@ import org.json.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-
-import nu.xom.Document;
-import nu.xom.Element;
-import nu.xom.Nodes;
 import ch.ethz.livingscience.Page;
 import ch.ethz.livingscience.data.Profile;
 import ch.ethz.livingscience.data.ProfilesDB;
@@ -33,6 +26,9 @@ import ch.ethz.livingscience.data.wikitopics.SprikiKeyword;
 import ch.ethz.livingscience.data.wikitopics.SprikiRelations;
 import ch.ethz.livingscience.data.wikitopics.SprikiResult;
 import ch.ethz.livingscience.data.wikitopics.SprikiResults;
+import nu.xom.Document;
+import nu.xom.Element;
+import nu.xom.Nodes;
 
 public class WelcomePage extends Page
 {

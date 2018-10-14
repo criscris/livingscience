@@ -79,11 +79,11 @@ public class NGramStore2_inMemory
 	
 	final int minYear;
 	final int maxYear; 
-	final int noOfYears;
-	float[] years;
+	final int noOfYears; // number of years analysed
+	float[] years; // contains years analysed
 	final int[] zeros;
 	
-	int[] yearsTotal;
+	int[] yearsTotal; // contains total number of pubs per year
 	
 	public NGramStore2_inMemory(File file, int minYear, int maxYear) throws Exception
 	{
@@ -129,9 +129,64 @@ public class NGramStore2_inMemory
 		return n;
 	}
 	
+	public float[] getPercentageYearCounts(String ngram)
+	{
+		float[] n = new float[noOfYears];
+		int[] result = getYearCounts(ngram);
+		for (int i=0; i<noOfYears; i++)
+		{
+			n[i] = yearsTotal[i] == 0 ? 0f : ((float) 100*result[i] / yearsTotal[i]);
+		}
+		return n;
+	}
 	
 	public float[] getYears()
 	{
 		return years;
+	}
+	
+	//new
+	public int getNoOfYears()
+	{
+		return noOfYears;
+	}
+	
+	public int getMin()
+	{
+		return minYear;
+	}
+	
+	public int getMax()
+	{
+		return maxYear;
+	}
+	
+	public HashMap<String, Double> getNgramToScore()
+	{
+		HashMap<String, Double> ngramToScore = new HashMap<>();
+		
+		for(String ngram : ngramToData.keySet())
+		{
+			float[] counts = getPercentageYearCounts(ngram);
+			//total sum of the slopes, for now calculated as ((counts yeari+1)-(counts yeari))^3 to give more value
+			//to steep slopes and keep the sign (plain average would just be lastyear-firstyear)
+			double totalSum = 0;
+			for(int i=0;i<noOfYears-1;i++)
+			{
+				//Method 1: squares
+//				totalSum += Math.pow(counts[i+1] - counts[i], 3) ;
+				//Method 2: percentage increase
+				if(counts[i]!=0) 
+				{
+					totalSum += 100*(counts[i+1]-counts[i])/counts[i];
+				}
+				else if(counts[i+1]!=0)
+				{
+					totalSum+=100;
+				}
+			}
+			ngramToScore.put(ngram, totalSum/(noOfYears-1));
+		}
+		return ngramToScore;
 	}
 }

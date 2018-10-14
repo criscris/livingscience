@@ -52,7 +52,7 @@ public class LivingScienceServer
 //		RandomAccessTextFile rat = new RandomAccessTextFile(ngramsFile, indexFile);
 		
 		//MANUAL: range of years for ngrams plot
-		NGramStore2_inMemory ngramsStore = new NGramStore2_inMemory(ngramsFile, 2004, 2017);
+		NGramStore2_inMemory ngramsStore = new NGramStore2_inMemory(ngramsFile, 2005, 2017);
 		
 		final LivingScienceServlet profilesServlet = new LivingScienceServlet(staticContentDir, db, searchIndex, ngramsStore);
 		System.out.println("Servlet initialized.");

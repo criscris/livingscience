@@ -201,7 +201,8 @@ function LivingScienceMenu()
 		subMenuList.push(new SubMenuEntry("List", urlStart, ""));
 		subMenuList.push(new SubMenuEntry("Affiliation Map", urlStart + "affiliations"));
 		subMenuList.push(new SubMenuEntry("Wikipedia Topics", urlStart + "topics"));
-		subMenuList.push(new SubMenuEntry("Keyword Trends", urlStart + "ngrams"));	
+		subMenuList.push(new SubMenuEntry("Keyword Trends", urlStart + "ngrams"));
+		subMenuList.push(new SubMenuEntry("Global Trends", urlStart + "global"));
 		this.menuEntriesList.push(new MenuEntry("Analyze", subMenuList, this));
 		
 		subMenuList = new Array();
@@ -227,6 +228,10 @@ function LivingScienceMenu()
 //		var g = new GenericDialog("Sign In", $content.get(0), buttons);
 //		g.$cancelButton.text("OK");
 //	});
+//	subMenuList = new Array();
+//	subMenuList.push(new SubMenuEntry("Global Trends", urlStart + "global"));
+//	var globalMenu = new MenuEntry("Global", subMenuList, this);
+//	this.menuEntriesList.push(globalMenu);
 }
 
 /**
