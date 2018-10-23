@@ -38,8 +38,10 @@ public class ACMgramsYears
 	public static void main(String[] args) throws Exception
 	{
 		//obtain counts between 2000 and 2014
-		ACMgramsYears c = new ACMgramsYears(2005, 2018);
-		c.countNGramsByYear(2005, 2018);
+		int fYear = new Integer(args[0]);
+		int tYear = new Integer(args[1]);
+		ACMgramsYears c = new ACMgramsYears(fYear, tYear);
+		c.countNGramsByYear(fYear, tYear);
 //		
 //		 DBObject currentAuthor = db.collProfilesAuto.findOne(new BasicDBObject("_id", new ObjectId(authorID)));
 //	        List<String> autPubs = getList(currentAuthor.get("pubs"));

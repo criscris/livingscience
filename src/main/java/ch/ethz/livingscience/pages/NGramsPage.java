@@ -331,18 +331,20 @@ class NGramInfo implements Comparable<NGramInfo>
 //		score = maxRise;
 		//total sum of the slopes, for now calculated as ((counts yeari+1)-(counts yeari))^3 to give more value
 		//to steep slopes and keep the sign (plain average would just be lastyear-firstyear)
-		double totalSum = 0;
-		for(int i=0;i<result.length-1;i++)
+//		double totalSum = 0;
+		int autaverage = 5;
+		for(int i=result.length-1-5;i<result.length-1;i++)
 		{
-			if(result[i]!=0) 
-			{
-				totalSum += 100*(result[i+1]-result[i])/result[i];
-			}
-			else if(result[i+1]!=0)
-			{
-				totalSum+=100;
-			}
-			score = (float) (totalSum/(result.length-1));
+//			if(result[i]!=0) 
+//			{
+//				totalSum += 100*(result[i+1]-result[i])/result[i];
+//			}
+//			else if(result[i+1]!=0)
+//			{
+//				totalSum+=100;
+//			}
+			score += (float) 100*result[i]/autaverage;
+//			score = (float) (totalSum/(result.length-1));
 		}
 	}
 

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import ch.ethz.livingscience.data.ProfilesDB;
+import ch.ethz.livingscience.ngrams.NGramScore;
 import ch.ethz.livingscience.ngrams.NGramStore2_inMemory;
 import nu.xom.Attribute;
 import nu.xom.Document;
@@ -50,7 +51,7 @@ public class GlobalTrendsPage extends ProfilePubListPage
 	//number of keywords to plot for a global trends graph
     static int noOfKeywords = 5;
 	// The score will be the average slope over one year intervals
-	Map<String, Double> ngramToScore;
+//	Map<String, Double> ngramToScore;
 	float[] years;
 	int noOfYears;
 
@@ -59,7 +60,7 @@ public class GlobalTrendsPage extends ProfilePubListPage
 		super(doc, db, profileID);
 		this.ngramsStore = ngramsStore;
 		this.noOfYears = ngramsStore.getNoOfYears();
-		this.ngramToScore = ngramsStore.getNgramToScore();
+//		this.ngramToScore = ngramsStore.getNgramToScore();
 		
 		float[] allYears =  ngramsStore.getYears();
 		years = Arrays.copyOfRange(allYears, allYears.length - noOfYears, allYears.length);
@@ -68,17 +69,16 @@ public class GlobalTrendsPage extends ProfilePubListPage
 		
 	public void exec() throws IOException
 	{	
-		List<NGramScore> ngrams = new ArrayList<>();
-		for (String entry : ngramToScore.keySet())
-		{
-			ngrams.add(new NGramScore(entry,ngramToScore.get(entry),ngramsStore.getPercentageYearCounts(entry)));
-		}
-		
-		Collections.sort(ngrams);
-		
+		List<NGramScore> ngrams = ngramsStore.getLastYearList();
+//		for (String entry : ngramToScore.keySet())
+//		{
+//			ngrams.add(new NGramScore(entry,ngramToScore.get(entry),ngramsStore.getPercentageYearCounts(entry)));
+//		}
+
+		//Plot1: most active last year
 		Element heading = new Element("div", ns);
 		heading.addAttribute(new Attribute("class", "mainHeading"));
-		heading.appendChild("Global upwards trends: ");
+		heading.appendChild("Global most active keywords: ");
 		content.appendChild(heading);		
 
 		int noOfPlots = 0;
@@ -112,11 +112,49 @@ public class GlobalTrendsPage extends ProfilePubListPage
 		Element p = new Element("p", ns);
 		p.appendChild("Global top 5 upward trends keywords.");
 		stats.appendChild(p);
-//		p = new Element("p", ns);
-//		stats.appendChild("Web of Science lists about 47 million publications. We extracted 6.934.872 (1,2,3)-grams from publication titles, ignoring common stop words at beginning and end of n-grams and not considering n-grams that occur less than 5 times.");
-//		stats.appendChild(p);
-		
+
+		//Plot2: most increase last year
+		ngrams = ngramsStore.getLastYearIncreaseList();
+		Element heading2 = new Element("div", ns);
+		heading2.addAttribute(new Attribute("class", "mainHeading"));
+		heading2.appendChild("Global upwards trends: ");
+		content.appendChild(heading2);		
+
+		noOfPlots = 0;
+		try
+		{	
+			PlotCanvasSVG canvas2 = getSVGPlot(ngrams, years, new Range(ngramsStore.getMin(),ngramsStore.getMax()));
+			noOfPlots = canvas2.noOfPlots();
+			Element svg2 = canvas2.getSVG();
+			
+			svg2.addAttribute(new Attribute("width", (int) (0.65f * canvas2.getWidth()) + "px"));
+			svg2.addAttribute(new Attribute("height", (int) (0.65f * canvas2.getHeight()) + "px"));
+					
+			Element stats2 = new Element("div", ns);
+			stats2.addAttribute(new Attribute("class", "contentEntry"));
+			stats2.appendChild(svg2);
+					
+			content.appendChild(stats2);
+					
+		}
+		catch (Exception e)
+		{
+			throw new IOException(e.getCause());
+		}
+				
+				
+		Element stats2 = new Element("div", ns);
+		stats2.addAttribute(new Attribute("class", "contentEntry"));
+		content.appendChild(stats2);
+				
+				
+		Element p2 = new Element("p", ns);
+		p2.appendChild("Global top 5 upward increase trends keywords.");
+		stats2.appendChild(p2);
+				
+				
 		// Now the downwards trends
+		ngrams = ngramsStore.getTotalIncreaseList();
 		Element headingDown = new Element("div", ns);
 		headingDown.addAttribute(new Attribute("class", "mainHeading"));
 		headingDown.appendChild("Global downwards trends: ");
@@ -294,21 +332,4 @@ public class GlobalTrendsPage extends ProfilePubListPage
 	}
 }
 
-class NGramScore implements Comparable<NGramScore>
-{	
-	String name;
-	double score;
-	float[] result;
-	
-	public NGramScore(String name, Double score, float[] result)
-	{
-		this.name = name;
-		this.score = score;
-		this.result = result;
-	}
 
-	public int compareTo(NGramScore o) 
-	{
-		return (int) ((o.score - score) * Math.pow(10, 20));
-	}
-}
