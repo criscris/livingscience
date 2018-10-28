@@ -1,6 +1,12 @@
 package ch.ethz.livingscience.datacreation;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,8 +43,8 @@ public class TestCreation implements LineListener
 	
 	public TestCreation() throws Exception
 	{
-		db = new ProfilesDB(27013);
-		nameToID = createNameToID();
+//		db = new ProfilesDB(27013);
+//		nameToID = createNameToID();
 	}
 	
 	//map with existing authors
@@ -58,7 +64,7 @@ public class TestCreation implements LineListener
 	
 	public void exec() throws Exception
 	{
-		TextFileUtil.loadList(new File("D:/LivingScience/Data/arxiv/arxivmeta_summaries.txt"), this);
+		readFirst(Paths.get("C:/Users/almud/livingscience/data/arxivngrams/ngrams_profiles_index.txt"),10);
 	}
 	
 	int autCount=0;
@@ -113,4 +119,15 @@ public class TestCreation implements LineListener
 		
 		return list;
 	}	
+	public void readFirst(final Path path, final int numLines) throws IOException {
+	    try (final BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+//	        final List<String> lines = new ArrayList<>(numLines);
+	        int lineNum = 0;
+	        String line;
+	        while ((line = reader.readLine()) != null && lineNum < numLines) {
+	            System.out.println(line);
+	            lineNum++;
+	        }
+	    }
+	}
 }

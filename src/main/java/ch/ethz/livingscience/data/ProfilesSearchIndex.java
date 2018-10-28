@@ -44,10 +44,11 @@ public class ProfilesSearchIndex
 		System.out.println("iterating over all docs took " + (System.currentTimeMillis() - time) + " ms. " + noOfAutomaticProfiles + " auto and " + noOfManualProfiles + " manual profiles indexed.");
 	
 		time = System.currentTimeMillis();
-		ngramsSearchIndex = new RandomAccessTextFile(
-				new File(searchIndexDir, "ngrams_profiles.txt"),
-				new File(searchIndexDir, "ngrams_profiles_index.txt"));
-		System.out.println("Loaded n-gram search index in " + (System.currentTimeMillis() - time) + " ms.");
+		//TODO: delete this
+//		ngramsSearchIndex = new RandomAccessTextFile(
+//				new File(searchIndexDir, "ngrams_profiles.txt"),
+//				new File(searchIndexDir, "ngrams_profiles_index.txt"));
+//		System.out.println("Loaded n-gram search index in " + (System.currentTimeMillis() - time) + " ms.");
 		
 	}
 	

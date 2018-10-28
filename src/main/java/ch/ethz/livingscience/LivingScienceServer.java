@@ -20,6 +20,8 @@ public class LivingScienceServer
 		File staticContentDir = null;
 		File ngramsFile = null;
 		File searchIndexDir = null;
+		int fromYear = 2005;
+		int toYear = 2018;
 		try
 		{
 			port = new Integer(args[0]);
@@ -27,13 +29,14 @@ public class LivingScienceServer
 			staticContentDir = new File(args[2]);
 			ngramsFile = new File(args[3]);
 			searchIndexDir = new File(args[4]);
+			fromYear = new Integer(args[5]);
+			toYear = new Integer(args[6]);
 		}
 		catch (Exception ex)
 		{
 			System.out.println("USAGE: port portMongoDB pathToStaticContent ngramsFile searchIndexDir"); // pathToLivingScienceDB");
 			return;
 		}
-		
 		File logFile = new File("log.txt");
 		Log.setLogFile(logFile);
 		
@@ -52,7 +55,7 @@ public class LivingScienceServer
 //		RandomAccessTextFile rat = new RandomAccessTextFile(ngramsFile, indexFile);
 		
 		//MANUAL: range of years for ngrams plot
-		NGramStore2_inMemory ngramsStore = new NGramStore2_inMemory(ngramsFile, 2005, 2017);
+		NGramStore2_inMemory ngramsStore = new NGramStore2_inMemory(ngramsFile, 2005, 2018);
 		
 		final LivingScienceServlet profilesServlet = new LivingScienceServlet(staticContentDir, db, searchIndex, ngramsStore);
 		System.out.println("Servlet initialized.");
