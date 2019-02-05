@@ -21,14 +21,9 @@ public abstract class ACMngramsCreator implements LineListener{
 
 public static void main(String[] args) throws Exception
 {
-    exec();
-	
-//	String[] ancestors = {"Document types", "General and reference"};
-//	String[] children = {"Reliability", "Empirical studies", "Measurement", "Metrics", "Evaluation", "Experimentation", "Estimation", "Design", "Performance", "Validation", "Verification"};
-//	for(String child:children) {
-//		BasicDBObject doc = new BasicDBObject("name", child).append("ancestors", ancestors);
-//	    db.collAcm.insert(doc);
-//	}
+	int port = new Integer(args[0]);
+	File acmFile = new File(args[1]);;
+    exec(port, acmFile);
 }
 
 static List<String> ancestors = new ArrayList<String>();
@@ -36,10 +31,10 @@ static List<String> indents = new ArrayList<String>();
 static Set<String> stopWordsSet = new HashSet<>();
 static ProfilesDB db;
 static int count = 0;
-public static void exec() throws Exception {
+public static void exec(int port, File acmFile) throws Exception {
 	stopWordsSet = new HashSet<>(Arrays.asList(stopWords));
-	db = new ProfilesDB(27013);
-	BufferedReader reader = new BufferedReader(new FileReader(new File("data/acmngrams/acmdata.txt")));
+	db = new ProfilesDB(port);
+	BufferedReader reader = new BufferedReader(new FileReader(acmFile));
 	String line = null;
 	int index = 0;
 	while ((line = reader.readLine()) != null)
