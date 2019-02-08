@@ -38,10 +38,11 @@ public class ACMgramsYears
 	public static void main(String[] args) throws Exception
 	{
 		//obtain counts between 2000 and 2014
-		int fYear = new Integer(args[0]);
-		int tYear = new Integer(args[1]);
+		int port = new Integer(args[0]);
+		int fYear = new Integer(args[1]);
+		int tYear = new Integer(args[2]);
 		ACMgramsYears c = new ACMgramsYears(fYear, tYear);
-		c.countNGramsByYear(fYear, tYear);
+		c.countNGramsByYear(port, fYear, tYear);
 //		
 //		 DBObject currentAuthor = db.collProfilesAuto.findOne(new BasicDBObject("_id", new ObjectId(authorID)));
 //	        List<String> autPubs = getList(currentAuthor.get("pubs"));
@@ -85,10 +86,10 @@ public class ACMgramsYears
 		oldNGram = new HashMap<>();
 	}
 	
-	public void countNGramsByYear(int fromYear, int toYear) throws Exception
+	public void countNGramsByYear(int port, int fromYear, int toYear) throws Exception
 	{
 		NGrams ngrams = NGrams.getInstance();
-		ProfilesDB db = new ProfilesDB(27013);
+		ProfilesDB db = new ProfilesDB(port);
 		
 		DBCursor cursor = db.collPubs.find();
 		Set<String> shortnames = new HashSet<>();
