@@ -44,7 +44,6 @@ public class ProfilesDB
 		collProfilesManual = db.getCollection(profilesManualCollection);
 		collPubLists = db.getCollection(listsCollection);
 		collAcm = db.getCollection(acmCollection);
-		
 		System.out.println("Connected to mongo.");
 	}
 	

@@ -129,11 +129,11 @@ public class SprikiRelations
 		data.keywords = new ArrayList<SprikiKeyword>();
 		for (SprikiKeyword keyword : occuredTopicsSet)
 		{
-			if (keyword.occurrences > 1 && keyword.occurrences < allPubs.size()) // use only topics which occur in more than one paper but not in all
-			{
+//			if (keyword.occurrences > 1 && keyword.occurrences < allPubs.size()) // use only topics which occur in more than one paper but not in all
+//			{
 				keyword.pcaIndex =data.keywords.size();
 				data.keywords.add(keyword);
-			}
+//			}
 		}
 		for (int i=0; i<allPubs.size(); i++)
 		{

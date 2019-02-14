@@ -216,6 +216,7 @@ public class ProfilesDBCreator implements LineListener
 	  DBCursor cursor = db.collPubs.find();
 	  while(cursor.hasNext()) {
 		  DBObject dbo = cursor.next();
+		  if(dbo.get("title")!=null) {
 		  String longtitle = dbo.get("title").toString();
 		  String[] pname = longtitle.split("[\\p{Punct}\\s]+");
 		  String fname = "";
@@ -223,6 +224,7 @@ public class ProfilesDBCreator implements LineListener
 		       if(!stopWordsSet.contains(p)) {fname +=p;}
 		  }
 		  titles.put(fname, dbo.get("_id").toString());
+		  }
 	  }
 	  return titles;
   }

@@ -166,7 +166,6 @@ public class ProfilesSearchIndex
 			}			
 			return scores;
 		}
-		
 		return queryNGramsSearchIndex(query);
 	}
 	
@@ -174,16 +173,20 @@ public class ProfilesSearchIndex
 	{
 		Map<String, Float> scores = new HashMap<>();
 		String line = null;
-		
 		try 
 		{
-			line = ngramsSearchIndex.getLine(query);
+			if(ngramsSearchIndex != null) {
+				line = ngramsSearchIndex.getLine(query);
+			}
+			else {
+				return scores;
+			}
 		} 
 		catch (IOException e) 
 		{
 			e.printStackTrace();
 		}
-		
+
 		if (line == null) return scores;
 		
 		List<String> parts = TextFileUtil.split(line, ";");
