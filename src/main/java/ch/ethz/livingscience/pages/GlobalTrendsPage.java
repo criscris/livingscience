@@ -232,6 +232,7 @@ public class GlobalTrendsPage extends ProfilePubListPage
 		{
 			NGramScore ngram = ngrams.get(i);
 			i++;
+//			System.out.println(ngram.name + ", " + ngram.score);
 			if(globalWords.contains(ngram.name)) {
 				//get the log of the result array
 //				float[] presult = ngram.result;

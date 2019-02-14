@@ -14,7 +14,15 @@ public class NGramScore implements Comparable<NGramScore>{
 
 	public int compareTo(NGramScore o) 
 	{
-		return (int) ((o.score - score) * Math.pow(10, 20));
+		double res = o.score - score;
+		if(res > 0.0) {
+			return (int) 1;
+		}
+		else if(res == 0.0) {
+			return (int) 0;
+		}else {
+			return (int)-1;
+		}
 	}
 
 }

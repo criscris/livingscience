@@ -169,7 +169,7 @@ public class NGramStore2_inMemory
 		List<NGramScore> ngramToScore = new ArrayList<>();
 		for(String ngram : ngramToData.keySet())
 		{
-			ngramToScore.add(new NGramScore(ngram, (double) getYearCounts(ngram)[noOfYears-1], getPercentageYearCounts(ngram)));
+			ngramToScore.add(new NGramScore(ngram, (double) getYearCounts(ngram)[noOfYears-2], getPercentageYearCounts(ngram)));
 		}
 		Collections.sort(ngramToScore);
 		return ngramToScore;
@@ -180,8 +180,11 @@ public class NGramStore2_inMemory
 		List<NGramScore> ngramToScore = new ArrayList<>();
 		for(String ngram : ngramToData.keySet())
 		{
-			double increase = (double) (getYearCounts(ngram)[noOfYears-1] - getYearCounts(ngram)[noOfYears-2]);
-			ngramToScore.add(new NGramScore(ngram, increase, getPercentageYearCounts(ngram)));
+			int ngramyears[] = getYearCounts(ngram);
+
+			int increase = ngramyears[noOfYears-2] - ngramyears[noOfYears-3];
+			//double increase =  - (double)getYearCounts(ngram)[noOfYears-2];
+			ngramToScore.add(new NGramScore(ngram, (double) increase, getPercentageYearCounts(ngram)));
 		}
 		Collections.sort(ngramToScore);
 		return ngramToScore;
@@ -192,7 +195,7 @@ public class NGramStore2_inMemory
 		List<NGramScore> ngramToScore = new ArrayList<>();
 		for(String ngram : ngramToData.keySet())
 		{
-			double increase = (double) (getYearCounts(ngram)[noOfYears-1] - getYearCounts(ngram)[0]);
+			double increase = (double) (getYearCounts(ngram)[noOfYears-2] - getYearCounts(ngram)[0]);
 			ngramToScore.add(new NGramScore(ngram, increase, getPercentageYearCounts(ngram)));
 		}
 		Collections.sort(ngramToScore);
