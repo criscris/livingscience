@@ -19,6 +19,7 @@ public class LivingScienceServer
 		int mongoPort = 0;
 		File staticContentDir = null;
 		File ngramsFile = null;
+		File ngramsGlobalFile = null;
 		File searchIndexDir = null;
 		int fromYear = 2005;
 		int toYear = 2018;
@@ -28,9 +29,10 @@ public class LivingScienceServer
 			mongoPort = new Integer(args[1]);
 			staticContentDir = new File(args[2]);
 			ngramsFile = new File(args[3]);
-			searchIndexDir = new File(args[4]);
-			fromYear = new Integer(args[5]);
-			toYear = new Integer(args[6]);
+			ngramsGlobalFile = new File(args[4]);
+			searchIndexDir = new File(args[5]);
+			fromYear = new Integer(args[6]);
+			toYear = new Integer(args[7]);
 		}
 		catch (Exception ex)
 		{
@@ -57,7 +59,7 @@ public class LivingScienceServer
 		//MANUAL: range of years for ngrams plot
 		NGramStore2_inMemory ngramsStore = new NGramStore2_inMemory(ngramsFile, 2005, 2018);
 		
-		final LivingScienceServlet profilesServlet = new LivingScienceServlet(staticContentDir, db, searchIndex, ngramsStore);
+		final LivingScienceServlet profilesServlet = new LivingScienceServlet(staticContentDir, db, searchIndex, ngramsStore, ngramsGlobalFile, fromYear, toYear);
 		System.out.println("Servlet initialized.");
 		
 		JettyServer coral = new JettyServer(port) 

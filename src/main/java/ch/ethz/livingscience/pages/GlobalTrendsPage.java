@@ -1,11 +1,19 @@
 package ch.ethz.livingscience.pages;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import ch.ethz.livingscience.data.ProfilesDB;
 import ch.ethz.livingscience.ngrams.NGramScore;
@@ -48,25 +56,41 @@ public class GlobalTrendsPage extends ProfilePubListPage
 	};
 	
 	NGramStore2_inMemory ngramsStore;
+	static HashSet<String> globalWords;
 	//number of keywords to plot for a global trends graph
-    static int noOfKeywords = 5;
+    static int noOfKeywords = 10;
 	// The score will be the average slope over one year intervals
 //	Map<String, Double> ngramToScore;
 	float[] years;
 	int noOfYears;
+	int fromYear, toYear;
 
-	public GlobalTrendsPage(Document doc, ProfilesDB db, String profileID, NGramStore2_inMemory ngramsStore) throws IOException
+	public GlobalTrendsPage(Document doc, ProfilesDB db, String profileID, NGramStore2_inMemory ngramsStore, File ngramsGlobalFile, int fromYear, int toYear) throws IOException
 	{
 		super(doc, db, profileID);
 		this.ngramsStore = ngramsStore;
 		this.noOfYears = ngramsStore.getNoOfYears();
+		this.globalWords = getGlobalWords(ngramsGlobalFile);
+		this.fromYear = fromYear;
+		this.toYear = toYear;
+
 //		this.ngramToScore = ngramsStore.getNgramToScore();
 		
 		float[] allYears =  ngramsStore.getYears();
 		years = Arrays.copyOfRange(allYears, allYears.length - noOfYears, allYears.length);
 		
 	}
-		
+	public HashSet<String> getGlobalWords(File wordsFile) throws IOException {
+		HashSet<String> globalwords = new HashSet<>();
+		BufferedReader reader = new BufferedReader(new FileReader(wordsFile));
+		String line = null;
+		while ((line = reader.readLine()) != null)
+		{
+			globalwords.add(line);
+		}
+		reader.close();
+		return globalwords;
+	}
 	public void exec() throws IOException
 	{	
 		List<NGramScore> ngrams = ngramsStore.getLastYearList();
@@ -78,7 +102,7 @@ public class GlobalTrendsPage extends ProfilePubListPage
 		//Plot1: most active last year
 		Element heading = new Element("div", ns);
 		heading.addAttribute(new Attribute("class", "mainHeading"));
-		heading.appendChild("Global most active keywords: ");
+		heading.appendChild("Global most active keywords in " + toYear +" : ");
 		content.appendChild(heading);		
 
 		int noOfPlots = 0;
@@ -110,7 +134,8 @@ public class GlobalTrendsPage extends ProfilePubListPage
 		
 		
 		Element p = new Element("p", ns);
-		p.appendChild("Global top 5 upward trends keywords.");
+		int ffyear = toYear - 1;
+		p.appendChild("Global top " + noOfKeywords + " upward trends keywords.");
 		stats.appendChild(p);
 
 		//Plot2: most increase last year
@@ -149,7 +174,7 @@ public class GlobalTrendsPage extends ProfilePubListPage
 				
 				
 		Element p2 = new Element("p", ns);
-		p2.appendChild("Global top 5 upward increase trends keywords.");
+		p2.appendChild("Global top 5 upward increase trends keywords from " + ffyear + " to " + toYear + ".");
 		stats2.appendChild(p2);
 				
 				
@@ -157,7 +182,7 @@ public class GlobalTrendsPage extends ProfilePubListPage
 		ngrams = ngramsStore.getTotalIncreaseList();
 		Element headingDown = new Element("div", ns);
 		headingDown.addAttribute(new Attribute("class", "mainHeading"));
-		headingDown.appendChild("Global downwards trends: ");
+		headingDown.appendChild("Global downwards trends from " + fromYear + " to " + toYear + ": ");
 		content.appendChild(headingDown);		
 
 		noOfPlots = 0;
@@ -206,39 +231,42 @@ public class GlobalTrendsPage extends ProfilePubListPage
 		while (i < ngrams.size() && addedCount < noOfKeywords)
 		{
 			NGramScore ngram = ngrams.get(i);
-			//get the log of the result array
-//			float[] presult = ngram.result;
-//			for(int j=0;j<presult.length;j++)
-//			{
-//				presult[j] = (float) Math.log10(presult[j]);
-//			}
 			i++;
-			if (ngram.score == 0f) continue;
-			if (ngramsAdded.indexOf(ngram.name) != -1) continue; // is a subset of an existing ngram
-			
-			RgbColor color = addedCount < colors.length ? colors[addedCount] : new RgbColor((float) Math.random(), (float) Math.random(), (float) Math.random());
-			
-			Plot p = new Plot(years, ngram.result);
-			//Try plotting the logarithm instead
-//			Plot p = new Plot(years, presult);
-			
-			PlotLineProps props = new PlotLineProps(color);
-			p.props = props;
-			plots.add(p);
+			if(globalWords.contains(ngram.name)) {
+				//get the log of the result array
+//				float[] presult = ngram.result;
+//				for(int j=0;j<presult.length;j++)
+//				{
+//					presult[j] = (float) Math.log10(presult[j]);
+//				}
+				if (ngram.score == 0f) continue;
+				if (ngramsAdded.indexOf(ngram.name) != -1) continue; // is a subset of an existing ngram
+				
+				RgbColor color = addedCount < colors.length ? colors[addedCount] : new RgbColor((float) Math.random(), (float) Math.random(), (float) Math.random());
+				
+				Plot p = new Plot(years, ngram.result);
+				//Try plotting the logarithm instead
+//				Plot p = new Plot(years, presult);
+				
+				PlotLineProps props = new PlotLineProps(color);
+				p.props = props;
+				plots.add(p);
 
-			p = new Plot(years, ngram.result);
-//			p = new Plot(years, presult);
-			PlotDotProps dprops = new PlotDotProps(color);
-			dprops.shape = shapes[addedCount % shapes.length];
-			p.props = dprops;
-			p.label = ngram.name;
-			plots.add(p);
-						
-			addedCount++;
-			ngramsAdded += ngram.name + ";";
+				p = new Plot(years, ngram.result);
+//				p = new Plot(years, presult);
+				PlotDotProps dprops = new PlotDotProps(color);
+				dprops.shape = shapes[addedCount % shapes.length];
+				p.props = dprops;
+				p.label = ngram.name;
+				plots.add(p);
+							
+				addedCount++;
+				ngramsAdded += ngram.name + ";";
+				
+				maxY = Math.max(maxY, p.yRange.max);
+				minY = Math.min(minY, p.yRange.min);
+			}
 			
-			maxY = Math.max(maxY, p.yRange.max);
-			minY = Math.min(minY, p.yRange.min);
 		}
 		int min = 0;
 		for (; min>=-6; min--) if (Math.pow(10, min) < minY) break;
@@ -281,32 +309,35 @@ public class GlobalTrendsPage extends ProfilePubListPage
 //				presult[j] = (float) Math.log10(presult[j]);
 //			}
 			i++;
-			if (ngram.score == 0f) continue;
-			if (ngramsAdded.indexOf(ngram.name) != -1) continue; // is a subset of an existing ngram
-			
-			RgbColor color = addedCount < colors.length ? colors[addedCount] : new RgbColor((float) Math.random(), (float) Math.random(), (float) Math.random());
-			
-			Plot p = new Plot(years, ngram.result);
-			//Try plotting the logarithm instead
-//			Plot p = new Plot(years, presult);
-			
-			PlotLineProps props = new PlotLineProps(color);
-			p.props = props;
-			plots.add(p);
+			if(globalWords.contains(ngram.name)) {
+				if (ngram.score == 0f) continue;
+				if (ngramsAdded.indexOf(ngram.name) != -1) continue; // is a subset of an existing ngram
+				
+				RgbColor color = addedCount < colors.length ? colors[addedCount] : new RgbColor((float) Math.random(), (float) Math.random(), (float) Math.random());
+				
+				Plot p = new Plot(years, ngram.result);
+				//Try plotting the logarithm instead
+//				Plot p = new Plot(years, presult);
+				
+				PlotLineProps props = new PlotLineProps(color);
+				p.props = props;
+				plots.add(p);
 
-			p = new Plot(years, ngram.result);
-//			p = new Plot(years, presult);
-			PlotDotProps dprops = new PlotDotProps(color);
-			dprops.shape = shapes[addedCount % shapes.length];
-			p.props = dprops;
-			p.label = ngram.name;
-			plots.add(p);
-						
-			addedCount++;
-			ngramsAdded += ngram.name + ";";
+				p = new Plot(years, ngram.result);
+//				p = new Plot(years, presult);
+				PlotDotProps dprops = new PlotDotProps(color);
+				dprops.shape = shapes[addedCount % shapes.length];
+				p.props = dprops;
+				p.label = ngram.name;
+				plots.add(p);
+							
+				addedCount++;
+				ngramsAdded += ngram.name + ";";
+				
+				maxY = Math.max(maxY, p.yRange.max);
+				minY = Math.min(minY, p.yRange.min);
+			}
 			
-			maxY = Math.max(maxY, p.yRange.max);
-			minY = Math.min(minY, p.yRange.min);
 		}
 		int min = 0;
 		for (; min>=-6; min--) if (Math.pow(10, min) < minY) break;

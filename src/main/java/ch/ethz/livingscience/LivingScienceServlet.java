@@ -51,6 +51,7 @@ public class LivingScienceServlet extends HttpServlet
 	private static final long serialVersionUID = 1L;
 	
 	File staticContentDir;
+	File ngramsGlobalFile;
 	CachedFile responseTemplate;
 	CachedFile homeResTemp;
 	Map<String, CachedFile> cachedFiles = new HashMap<>();
@@ -61,14 +62,19 @@ public class LivingScienceServlet extends HttpServlet
 	SprikiRelations relations;
 	NGramStore2_inMemory ngramsStore;
 	
+	int fromYear, toYear;
+	
 	Map<String, ExternalSearchProvider> externalSearchProviders = new HashMap<>();
 	
-	public LivingScienceServlet(File staticContentDir, ProfilesDB db, ProfilesSearchIndex searchIndex, NGramStore2_inMemory ngramsStore) throws Exception
+	public LivingScienceServlet(File staticContentDir, ProfilesDB db, ProfilesSearchIndex searchIndex, NGramStore2_inMemory ngramsStore, File ngramsGlobalFile, int fromYear, int toYear) throws Exception
 	{
 		this.db = db;
 		this.searchIndex = searchIndex;
 		this.staticContentDir = staticContentDir;
 		this.ngramsStore = ngramsStore;
+		this.ngramsGlobalFile = ngramsGlobalFile;
+		this.fromYear = fromYear;
+		this.toYear = toYear;
 		
 		responseTemplate = new CachedFile(new File(staticContentDir, "ls.xml"));
 		homeResTemp = new CachedFile(new File(staticContentDir, "home.xml"));
@@ -250,7 +256,7 @@ public class LivingScienceServlet extends HttpServlet
 			break;
 			//new for global trends
 			case "global":
-				page = new GlobalTrendsPage(doc, db, rs.profileID, ngramsStore);
+				page = new GlobalTrendsPage(doc, db, rs.profileID, ngramsStore, ngramsGlobalFile, fromYear, toYear);
 			break;	
 			default: 
 				page = new ProfilePubListPage(doc, db, rs.profileID);
