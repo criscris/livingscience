@@ -131,7 +131,9 @@ public class ProfilesSearchIndex
 
 		for (String profile : profileNameList)
 		{
+			if(Math.abs(profile.length()-name.length())< 4) {
 			nameToProfileDistanceMap.put(ArxivAuthorNames.distance(profile, name), profile);
+			}
 //			if (ArxivAuthorNames.distance(profile, name) == 0)
 //			{
 //				profileIDs.addAll(nameToProfileIDMap.get(profile));
