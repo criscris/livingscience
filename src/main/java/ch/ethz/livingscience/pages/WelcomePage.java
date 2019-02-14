@@ -43,7 +43,7 @@ public class WelcomePage extends Page
 		this.db = db;
 		this.relations = relations;
 		this.searchIndex = searchIndex;
-		this.profile = findProfile("Dirk Helbing");
+		this.profile = findProfile("Helbing");
 	}
 
 	List<Publication> pubs;
