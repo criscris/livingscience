@@ -199,7 +199,7 @@ function LivingScienceMenu()
 
 		subMenuList = new Array();
 		subMenuList.push(new SubMenuEntry("List", urlStart, ""));
-		subMenuList.push(new SubMenuEntry("Affiliation Map", urlStart + "affiliations"));
+//		subMenuList.push(new SubMenuEntry("Affiliation Map", urlStart + "affiliations"));
 		subMenuList.push(new SubMenuEntry("Wikipedia Topics", urlStart + "topics"));
 		subMenuList.push(new SubMenuEntry("Keyword Trends", urlStart + "ngrams"));
 		subMenuList.push(new SubMenuEntry("Global Trends", urlStart + "global"));
