@@ -388,6 +388,15 @@ class NGramInfo implements Comparable<NGramInfo>
 
 	public int compareTo(NGramInfo o) 
 	{
-		return (int) ((o.score - score) * 1000000f);
+		float res = o.score - score;
+		if(res > 0.0) {
+			return (int) 1;
+		}
+		else if(res == 0.0) {
+			return (int) 0;
+		}else {
+			return (int)-1;
+		}
+		
 	}
 }
