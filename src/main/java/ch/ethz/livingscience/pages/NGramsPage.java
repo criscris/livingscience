@@ -110,9 +110,9 @@ public class NGramsPage extends ProfilePubListPage
 		    noOfPubs[index]+=1;
 			List<String> pubNgrams = new ArrayList<>();
 //			if (pub.title != null) pubNgrams.addAll(ngramsExtractor.getNGrams(pub.title, 2, 3));
-			if (pub.title != null) pubNgrams.addAll(ngramsExtractor.getACMNGrams(pub.title, 2, 3, shortnames));
+			if (pub.title != null) pubNgrams.addAll(ngramsExtractor.getACMNGrams(pub.title, 1, 3, shortnames));
 //			if (pub.summary != null) pubNgrams.addAll(ngramsExtractor.getNGrams(pub.summary, 2, 3));
-			if (pub.summary != null) pubNgrams.addAll(ngramsExtractor.getACMNGrams(pub.summary, 2, 3, shortnames));
+			if (pub.summary != null) pubNgrams.addAll(ngramsExtractor.getACMNGrams(pub.summary, 1, 3, shortnames));
 			Set<String> hs = new HashSet<>();
 			hs.addAll(pubNgrams);
 			pubNgrams.clear();

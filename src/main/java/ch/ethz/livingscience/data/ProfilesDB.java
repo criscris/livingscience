@@ -151,7 +151,7 @@ public class ProfilesDB
 			}
 		}
 		catch(IllegalArgumentException i){
-			System.out.println("RuntimeException");
+			System.out.println("RuntimeException, could not query for the id " + id + ".");
 		}
 		return query;
 	}

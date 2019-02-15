@@ -224,7 +224,7 @@
   	  font-size: 17px;
   	  border: none;
   	  cursor: pointer;
-  	  background : url(css/magnifying_glass.png);
+  	  background : url(/css/magnifying_glass.png);
 	}
 </style>
 <script type="application/javascript" src="/js/jquery-2.0.3.js">
@@ -307,7 +307,7 @@
 			<div class="contententry" ><span>There are currently</span><span id="noOfProfilesInDatabase" class="welcomeBig"> 0 </span><span>author profiles.</span></div>
 			<!-- <div class="contententry" style="margin-top:24px">Watch the introduction video:</div> -->
 			<!-- <div class="contententry" id="introVideo">  </div>	-->
-			<div class="contententry" style="margin-top:50px"><img src="css/logo-SoBigData.png" width="250px"></img></div>
+			<div class="contententry" style="margin-top:50px"><img src="/css/logo-SoBigData.png" width="250px"></img></div>
 		    <div id="welanimation" style="width:800px;height:100%;background-color:rgb(244,243,240);">
 		<!-- _ -->
 	</div>

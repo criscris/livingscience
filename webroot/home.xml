@@ -60,7 +60,7 @@
   	  font-size: 17px;
   	  border: none;
   	  cursor: pointer;
-  	  background : url(css/magnifying_glass.png);
+  	  background : url(/css/magnifying_glass.png);
 	}
 	
 	.logo-sbd {
@@ -124,8 +124,8 @@
 </script>
 </head>
 <body> 
-  <img src="css/logo-SoBigData.png" class="logo-sbd"/>
-  <img src="css/logo-LivingScience.png" class="logo-ls"/>
+  <img src="/css/logo-SoBigData.png" class="logo-sbd"/>
+  <img src="/css/logo-LivingScience.png" class="logo-ls"/>
   <div class="search-container">
     <form name="input" action="/#" method="get">
       <input id="queryInput" onFocus="this.select()" placeholder="Search firstname lastname or keywords" autocomplete="off" type="text" name="q" value=""/>
