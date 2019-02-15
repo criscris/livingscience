@@ -142,7 +142,7 @@ public class GlobalTrendsPage extends ProfilePubListPage
 		ngrams = ngramsStore.getLastYearIncreaseList();
 		Element heading2 = new Element("div", ns);
 		heading2.addAttribute(new Attribute("class", "mainHeading"));
-		heading2.appendChild("Global upwards trends: ");
+		heading2.appendChild("Global upwards trends from " + ffyear + " to " + toYear + ":");
 		content.appendChild(heading2);		
 
 		noOfPlots = 0;
@@ -174,7 +174,7 @@ public class GlobalTrendsPage extends ProfilePubListPage
 				
 				
 		Element p2 = new Element("p", ns);
-		p2.appendChild("Global top 5 upward increase trends keywords from " + ffyear + " to " + toYear + ".");
+		p2.appendChild("Global top 5 upward increase trends keywords.");
 		stats2.appendChild(p2);
 				
 				
