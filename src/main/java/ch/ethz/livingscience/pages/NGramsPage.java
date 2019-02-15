@@ -63,7 +63,7 @@ public class NGramsPage extends ProfilePubListPage
 	float[] years;
 	int noOfYears;
 	//number of keywords to plot for an author
-    static int noOfKeywords = 5;
+    static int noOfKeywords = 10;
 	public NGramsPage(Document doc, ProfilesDB db, String profileID, NGramStore2_inMemory ngramsStore) throws IOException
 	{
 		super(doc, db, profileID);
@@ -110,7 +110,7 @@ public class NGramsPage extends ProfilePubListPage
 		    noOfPubs[index]+=1;
 			List<String> pubNgrams = new ArrayList<>();
 //			if (pub.title != null) pubNgrams.addAll(ngramsExtractor.getNGrams(pub.title, 2, 3));
-			if (pub.title != null) pubNgrams.addAll(ngramsExtractor.getACMNGrams(pub.title, 1, 3, shortnames));
+			if (pub.title != null) pubNgrams.addAll(ngramsExtractor.getACMNGrams(pub.title, 2, 3, shortnames));
 //			if (pub.summary != null) pubNgrams.addAll(ngramsExtractor.getNGrams(pub.summary, 2, 3));
 			if (pub.summary != null) pubNgrams.addAll(ngramsExtractor.getACMNGrams(pub.summary, 2, 3, shortnames));
 			Set<String> hs = new HashSet<>();
@@ -141,6 +141,44 @@ public class NGramsPage extends ProfilePubListPage
 				}
 			}
 			}	
+		}
+		if (ngramsPSet.size()<10) {
+			for (Publication pub : pubs)
+			{
+				if(pub.year>=fromYear & pub.year<=toYear) {
+				int index = pub.year - fromYear;
+			    noOfPubs[index]+=1;
+				List<String> pubNgrams = new ArrayList<>();
+				if (pub.title != null) pubNgrams.addAll(ngramsExtractor.getACMNGrams(pub.title, 1, 3, shortnames));
+				Set<String> hs = new HashSet<>();
+				hs.addAll(pubNgrams);
+				pubNgrams.clear();
+				pubNgrams.addAll(hs);
+				
+				for (String ngram: pubNgrams)
+				{	
+					int[] countsNGram = ngramsPSet.get(ngram);
+					
+					//check if ngram is already in list
+					if (ngramsPSet.get(ngram) != null)
+					{
+						//increase count for the nGram
+						countsNGram[index] +=1;
+						countsNGram[noOfYears] +=1;
+						ngramsPSet.put(ngram, countsNGram);
+					}
+					else
+					{
+						//add new entry
+						countsNGram = new int[noOfYears+1];
+						Arrays.fill(countsNGram, 0);
+						countsNGram[index] = 1;
+						countsNGram[noOfYears] = 1;
+						ngramsPSet.put(ngram, countsNGram);
+					}
+				}
+				}
+		}
 		}
 		
 		/*

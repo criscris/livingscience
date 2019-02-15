@@ -98,13 +98,22 @@ public class NGrams
 					ngrams.add(word);
 				}	
 				else if((word.length()>3)&&(lastChar=='s')&&(shortnames.contains(word.substring(0, word.length() - 1)))) {
-					ngrams.add(word);
+					ngrams.add(word.substring(0, word.length() - 1));
 				}
 				else if((word.length()>3)&&(sLastChar=='e')&&(lastChar=='s')&&(shortnames.contains(word.substring(0, word.length() - 2)))) {
-					ngrams.add(word);
+					ngrams.add(word.substring(0, word.length() - 2));
 				}
 				else if((word.length()>3)&&(tLastChar=='i')&&(sLastChar=='e')&&(lastChar=='s')&&(shortnames.contains(word.substring(0, word.length() - 3)+'y'))) {
-					ngrams.add(word);
+					ngrams.add(word.substring(0, word.length() - 3)+'y');
+				}
+				else if(shortnames.contains(word+'s')) {
+					ngrams.add(word+'s');
+				}
+				else if(shortnames.contains(word+"es")) {
+					ngrams.add(word+"es");
+				}
+				else if((word.length()>2)&&(lastChar=='y')&&(shortnames.contains(word.substring(0, word.length() - 1)+"ies"))) {
+					ngrams.add(word.substring(0, word.length() - 1)+"ies");
 				}
 			}
 		}
