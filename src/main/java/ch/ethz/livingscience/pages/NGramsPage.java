@@ -253,7 +253,7 @@ public class NGramsPage extends ProfilePubListPage
 		
 		
 		Element p = new Element("p", ns);
-		p.appendChild(ngrams.size() + " keywords could be extracted from the publication list of " + profile.name + ". Displayed are the " + noOfKeywords + " keywords that have the best upward trend during " + (int) years[0] + " and " + (int) years[years.length - 1] + "."
+		p.appendChild(ngrams.size() + " keywords could be extracted from the publication list of " + profile.name + ". Displayed are the " + noOfKeywords + " keywords that were the most active in average between " + (int) years[0] + " and " + (int) years[years.length - 1] + "."
 				+ "The plot shows the percentage of all publications of the author for a specific year that contain the keyword.");
 		stats.appendChild(p);
 	}
