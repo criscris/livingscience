@@ -82,12 +82,30 @@ public class NGrams
 				//also take away spaces from nword, instead of list on args, search in db
 			    String[] pname = word.split("[\\p{Punct}\\s]+");
 			    String fname = "";
+			    char lastChar = 0;
+			    char sLastChar = 0;
+			    char tLastChar = 0;
+			    if(word.length()>3) {
+			    	lastChar = word.charAt(word.length() - 1);
+				    sLastChar = word.charAt(word.length() - 2);
+				    tLastChar = word.charAt(word.length() - 3);
+			    }
+			    
 			    for(String p:pname) {
 			       if(!stopWordsSet.contains(p)) {fname +=p;}
 			    }
 				if(shortnames.contains(fname)) {
 					ngrams.add(word);
 				}	
+				else if((word.length()>3)&&(lastChar=='s')&&(shortnames.contains(word.substring(0, word.length() - 1)))) {
+					ngrams.add(word);
+				}
+				else if((word.length()>3)&&(sLastChar=='e')&&(lastChar=='s')&&(shortnames.contains(word.substring(0, word.length() - 2)))) {
+					ngrams.add(word);
+				}
+				else if((word.length()>3)&&(tLastChar=='i')&&(sLastChar=='e')&&(lastChar=='s')&&(shortnames.contains(word.substring(0, word.length() - 3)+'y'))) {
+					ngrams.add(word);
+				}
 			}
 		}
 		
