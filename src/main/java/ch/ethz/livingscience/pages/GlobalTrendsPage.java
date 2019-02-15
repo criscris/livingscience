@@ -174,7 +174,7 @@ public class GlobalTrendsPage extends ProfilePubListPage
 				
 				
 		Element p2 = new Element("p", ns);
-		p2.appendChild("Global top 5 upward increase trends keywords.");
+		p2.appendChild("Global top " + noOfKeywords + " upward increase trends keywords.");
 		stats2.appendChild(p2);
 				
 				
@@ -214,7 +214,7 @@ public class GlobalTrendsPage extends ProfilePubListPage
 		
 		
 		Element pDown = new Element("p", ns);
-		pDown.appendChild("Global top 5 downward trends keywords.");
+		pDown.appendChild("Global top " + noOfKeywords + " downward trends keywords.");
 		statsDown.appendChild(pDown);
 	}
 	
