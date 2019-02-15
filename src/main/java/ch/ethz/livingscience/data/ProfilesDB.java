@@ -136,17 +136,22 @@ public class ProfilesDB
 		return true;
 	}
 	
-	private BasicDBObject getProfileQuery(String id)
+	private BasicDBObject getProfileQuery(String id) throws RuntimeException
 	{
 		String internalID = labelIDtoInternalID.get(id);
 		BasicDBObject query = null;
-		if (internalID == null)
-		{
-			query = new BasicDBObject("_id", new ObjectId(id));
+		try {
+			if (internalID == null)
+			{
+				query = new BasicDBObject("_id", new ObjectId(id));
+			}
+			else
+			{
+				query = new BasicDBObject("_id", new ObjectId(internalID));
+			}
 		}
-		else
-		{
-			query = new BasicDBObject("_id", new ObjectId(internalID));
+		catch(IllegalArgumentException i){
+			System.out.println("RuntimeException");
 		}
 		return query;
 	}
